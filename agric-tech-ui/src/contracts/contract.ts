@@ -1,5 +1,5 @@
 export const wagmiContractConfig = {
-  address: "0x8810e522F3ce6fb05038E734D2C7c1302Dd02987" as `0x${string}`,
+  address: "0x681E022Ab75A14d547a13C1b3Fe0e644D228e55B" as `0x${string}`,
   abi: [
     {
       anonymous: false,
@@ -98,6 +98,37 @@ export const wagmiContractConfig = {
         },
       ],
       name: "FarmerRegistered",
+      type: "event",
+    },
+    {
+      anonymous: false,
+      inputs: [
+        {
+          indexed: true,
+          internalType: "uint256",
+          name: "product_listId",
+          type: "uint256",
+        },
+        {
+          indexed: false,
+          internalType: "string",
+          name: "name",
+          type: "string",
+        },
+        {
+          indexed: false,
+          internalType: "address",
+          name: "ownerAddress",
+          type: "address",
+        },
+        {
+          indexed: false,
+          internalType: "uint256",
+          name: "price",
+          type: "uint256",
+        },
+      ],
+      name: "new_crop_added",
       type: "event",
     },
     {
@@ -238,43 +269,107 @@ export const wagmiContractConfig = {
       inputs: [
         {
           internalType: "address",
-          name: "_farmerAddress",
+          name: "_farmer",
+          type: "address",
+        },
+        {
+          internalType: "uint256",
+          name: "index",
+          type: "uint256",
+        },
+      ],
+      name: "getSupplyByIndex",
+      outputs: [
+        {
+          internalType: "uint256",
+          name: "id",
+          type: "uint256",
+        },
+        {
+          internalType: "address",
+          name: "customerAddress",
+          type: "address",
+        },
+        {
+          internalType: "string",
+          name: "nameOfProduct",
+          type: "string",
+        },
+        {
+          internalType: "uint256",
+          name: "quantity",
+          type: "uint256",
+        },
+        {
+          internalType: "uint256",
+          name: "totalCost",
+          type: "uint256",
+        },
+      ],
+      stateMutability: "view",
+      type: "function",
+    },
+    {
+      inputs: [
+        {
+          internalType: "address",
+          name: "_farmer",
           type: "address",
         },
       ],
-      name: "getSupply",
+      name: "getSupplyCount",
       outputs: [
         {
-          components: [
-            {
-              internalType: "uint256",
-              name: "id",
-              type: "uint256",
-            },
-            {
-              internalType: "address",
-              name: "customerAddress",
-              type: "address",
-            },
-            {
-              internalType: "string",
-              name: "nameOfProduct",
-              type: "string",
-            },
-            {
-              internalType: "uint256",
-              name: "quantity",
-              type: "uint256",
-            },
-            {
-              internalType: "uint256",
-              name: "totalCost",
-              type: "uint256",
-            },
-          ],
-          internalType: "struct AgricTech.Supply[]",
+          internalType: "uint256",
           name: "",
-          type: "tuple[]",
+          type: "uint256",
+        },
+      ],
+      stateMutability: "view",
+      type: "function",
+    },
+    {
+      inputs: [
+        {
+          internalType: "uint256",
+          name: "index",
+          type: "uint256",
+        },
+      ],
+      name: "get_product_by_index",
+      outputs: [
+        {
+          internalType: "uint256",
+          name: "id",
+          type: "uint256",
+        },
+        {
+          internalType: "string",
+          name: "name",
+          type: "string",
+        },
+        {
+          internalType: "address",
+          name: "ownerAddress",
+          type: "address",
+        },
+        {
+          internalType: "uint256",
+          name: "price",
+          type: "uint256",
+        },
+      ],
+      stateMutability: "view",
+      type: "function",
+    },
+    {
+      inputs: [],
+      name: "get_product_count",
+      outputs: [
+        {
+          internalType: "uint256",
+          name: "",
+          type: "uint256",
         },
       ],
       stateMutability: "view",
@@ -332,6 +427,59 @@ export const wagmiContractConfig = {
         {
           internalType: "uint256",
           name: "",
+          type: "uint256",
+        },
+      ],
+      stateMutability: "view",
+      type: "function",
+    },
+    {
+      inputs: [
+        {
+          internalType: "uint256",
+          name: "",
+          type: "uint256",
+        },
+      ],
+      name: "product_listId",
+      outputs: [
+        {
+          internalType: "uint256",
+          name: "",
+          type: "uint256",
+        },
+      ],
+      stateMutability: "view",
+      type: "function",
+    },
+    {
+      inputs: [
+        {
+          internalType: "uint256",
+          name: "",
+          type: "uint256",
+        },
+      ],
+      name: "products",
+      outputs: [
+        {
+          internalType: "uint256",
+          name: "id",
+          type: "uint256",
+        },
+        {
+          internalType: "string",
+          name: "name",
+          type: "string",
+        },
+        {
+          internalType: "address",
+          name: "ownerAddress",
+          type: "address",
+        },
+        {
+          internalType: "uint256",
+          name: "price",
           type: "uint256",
         },
       ],

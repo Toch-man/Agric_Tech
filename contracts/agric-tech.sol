@@ -20,7 +20,12 @@ contract AgricTech {
         address payable cropOwner;
         Status cropStatus;
     }
-
+    struct Product_list {
+        uint id;
+        string name;
+        address ownerAddress;
+        uint price;
+    }
     struct Supply {
         uint id;
         address customerAddress;
@@ -36,6 +41,8 @@ contract AgricTech {
     uint[] public cropId;
     uint[] public supplyId;
     uint[] public farmerId;
+    uint[] public product_listId;
+    Product_list[] public products;
 
     event CropUploaded(
         uint indexed cropId,
@@ -43,6 +50,12 @@ contract AgricTech {
         uint quantity,
         uint pricePerUnit,
         address cropOwner
+    );
+    event new_crop_added(
+        uint indexed product_listId,
+        string name,
+        address ownerAddress,
+        uint price
     );
 
     event CropPurchased(
@@ -62,6 +75,8 @@ contract AgricTech {
     mapping(address => Supply[]) public supplies;
     mapping(uint=> Farmer) public farmers;
     mapping(uint => Crop) public crops;
+   
+
 
     function registerFarmer(string memory _name,  string memory _location) public {
         farmers[nextFarmerId] = Farmer({
@@ -88,8 +103,18 @@ contract AgricTech {
             cropStatus: Status.AVAILABLE
         });
 
-        cropId.push(nextCropId);
+        products.push(Product_list({
+            id:nextCropId,
+            name: _name,
+            ownerAddress:msg.sender,
+            price: _pricePerUnit
+        }));
 
+        cropId.push(nextCropId);
+        product_listId.push(nextCropId);
+
+        emit new_crop_added(nextCropId, _name,msg.sender,_pricePerUnit);
+       
         emit CropUploaded(nextCropId, _name, _quantity, _pricePerUnit, msg.sender);
 
         nextCropId++;
@@ -101,7 +126,7 @@ contract AgricTech {
         require(crop.quantity >= quantityToBuy, "Not enough quantity available");
 
         uint totalPrice = crop.pricePerUnit * quantityToBuy;
-        require(msg.value == totalPrice, "Incorrect ETH sent");
+        require(msg.value < totalPrice, "Insufficient celo sent");
 
         crop.quantity -= quantityToBuy;
 
@@ -147,4 +172,17 @@ function getSupplyByIndex(address _farmer, uint index) public view returns (
     return (s.id, s.customerAddress, s.nameOfProduct, s.quantity, s.totalCost);
 }
 
+function get_product_count() public view returns (uint){
+    return  products.length;
+}
+
+function get_product_by_index(uint index) public view returns(
+        uint id,
+        string memory name,
+        address ownerAddress,
+        uint price
+        ){
+            Product_list memory p = products[index];
+            return (p.id,p.name,p.ownerAddress,p.price);
+        }
 }

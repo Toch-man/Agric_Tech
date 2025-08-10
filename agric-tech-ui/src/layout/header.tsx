@@ -23,40 +23,40 @@ function Header({ children }: { children?: React.ReactNode }) {
 
   useEffect(() => {
     if (!isConnected || !address || isRegistered === undefined) {
+      navigate("/homePage");
       return;
     }
 
-    const currentPath = location.pathname;
     if (isRegistered) {
       navigate("/dashBoard");
-    } else if (!isRegistered && currentPath !== "/register") {
-      navigate("/register");
     }
+    // else if (!isRegistered && currentPath !== "/register") {
+    //   navigate("/register");
+    // }
   }, [isConnected, address, isLoading, location.pathname, isRegistered]);
 
   const navBar = (
     <div
-      className={`${displayMenu ? "block absolute left-0 top-0 bottom-0 w-[300px] bg-black text-white z-50" : "hidden"}`}
+      className={`${displayMenu ? "block absolute left-0 top-0 bottom-0 pt-[65px] w-[300px] bg-black text-white z-50" : "hidden"}`}
     >
       <ul>
-        <li className="flex flex-row hover:bg-green-500">
+        <li className="flex flex-row p-5 hover:bg-green-500">
           <img></img>
           <p>Home</p>
         </li>
-        <li className="flex flex-row hover:bg-green-500">
+        <li className="flex flex-row p-5 hover:bg-green-500">
           <img></img>
           <p>About us</p>
         </li>
-        <li className="flex flex-row hover:bg-green-500">
+        <li className="flex flex-row p-5 hover:bg-green-500">
           <img></img>
           <p>Help</p>
         </li>
         <li
           onClick={() => {
             disconnect();
-            navigate("/homePage");
           }}
-          className="flex flex-row hover:bg-green-500"
+          className="flex flex-row p-5 hover:bg-green-500"
         >
           <img></img>
           <p>Disconnect wallet</p>
@@ -71,13 +71,13 @@ function Header({ children }: { children?: React.ReactNode }) {
         <img
           src={`${displayMenu ? "Frame.png" : "menu.png"}`}
           onClick={() => setDisplayMenu(!displayMenu)}
-          className={`w-[26px] h-[26px] z-100 ${displayMenu && "invert"}`}
+          className={` w-[26px] h-[26px]  z-100 ${displayMenu && "invert absolute top-10 left-[250px]"}`}
           alt="menu"
         ></img>
         <div className="flex flex-1 justify-end items-center pr-5">
           <p>{`${isLoading ? "checking wallet" : ""}`}</p>
           <button
-            className="flex items-center justify-center w-[150px] h-[50px] bg-green-300"
+            className="flex items-center justify-center w-[150px] h-[50px] bg-green-500"
             onClick={() => setDisplayWalletList(true)}
           >
             {isConnected
@@ -85,18 +85,23 @@ function Header({ children }: { children?: React.ReactNode }) {
               : "Connect wallet"}
           </button>
         </div>
-      </div>
-      <div className="absolute inset-x-0 flex justify-center">
-        {" "}
+      </div>{" "}
+      {!isConnected && (
         <div
-          className={`${displayWalletList ? "flex flex-row bg-black w-[400px] h-[200px] mx-auto" : "hidden"}`}
+          className={`${displayWalletList ? "flex flex-col absolute rounded border-black shadow-2xl py-5 left-1/3 top-1/3 z-100 bg-white w-[490px] h-[200px] " : "hidden"}`}
         >
-          {!isConnected && <WalletOptions />}
-        </div>
-      </div>
+          <h1 className="text-[25px]  text-blue-600 font-bold text-center">
+            Installed wallets
+          </h1>
 
+          <div className="flex flex-row">
+            {" "}
+            <WalletOptions />
+          </div>
+        </div>
+      )}
       {navBar}
-      {children}
+      <div className="z-50">{children}</div>
     </div>
   );
 }

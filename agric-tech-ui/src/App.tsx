@@ -1,6 +1,7 @@
 import HomePage from "./pages/home";
 import RegisterFarm from "./pages/register";
 import Dashboard from "./pages/dashBoard";
+import User_dashboard from "./pages/productList";
 import {
   BrowserRouter as Router,
   Route,
@@ -16,6 +17,7 @@ export default function App() {
         <Route path="*" element={<Navigate to="/HomePage" replace />} />
         <Route path="/register" element={<RegisterFarm />} />
         <Route path="/dashBoard" element={<Dashboard />} />
+        <Route path="/productList" element={<User_dashboard />} />
       </Routes>
     </Router>
   );
