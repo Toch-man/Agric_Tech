@@ -54,6 +54,15 @@ function Header({ children }: { children?: React.ReactNode }) {
         </li>
         <li
           onClick={() => {
+            navigate("/apply_for_role");
+          }}
+          className="flex flex-row p-5 hover:bg-green-500"
+        >
+          <img></img>
+          <p>Apply for a role</p>
+        </li>
+        <li
+          onClick={() => {
             disconnect();
           }}
           className="flex flex-row p-5 hover:bg-green-500"

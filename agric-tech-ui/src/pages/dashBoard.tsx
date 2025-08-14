@@ -6,7 +6,8 @@ import { readContract } from "wagmi/actions";
 import { useMutation } from "@tanstack/react-query";
 import { useWaitForTransactionReceipt } from "wagmi";
 import { wagmiContractConfig } from "../contracts/contract";
-import { useEffect, useState } from "react";
+import { parseEther } from "viem";
+import { FormEvent, useEffect, useState } from "react";
 export default function Dashboard() {
   const { address, isConnected } = useAccount();
   const [name, setName] = useState("");
@@ -56,7 +57,13 @@ export default function Dashboard() {
         });
         console.log("transaction hash", hash);
         set_txHash(hash);
-      } catch (error) {}
+      } catch (error) {
+        console.log(error);
+      }
+      set_is_submitting(false);
+      set_quantity("");
+      set_price_per_unit("");
+      setName("");
     },
   });
 
@@ -87,11 +94,29 @@ export default function Dashboard() {
       set_is_submitting(false);
       set_error_message(`transaction confirmation error:${confirmationError}`);
     }
-  }, [isConfirmationError, confirmationError]);
+    if (isConfirmed) {
+      set_is_submitting(false);
+      setTimeout(() => {
+        set_show_form(false);
+      }, 2000);
+    }
+  }, [isConfirmationError, confirmationError, isConfirmed]);
 
-  const price_in_wei = parseFloat(price_per_unit) * 1000000000000000;
+  //convert usdt to eth
+  const usd_to_eth = async (usd_amt: string) => {
+    const res = await fetch(
+      "https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd"
+    );
+    const data = await res.json();
+    const eth_in_usd = data.ethereum.usd;
+    const eth_amt = Number(usd_amt) / eth_in_usd;
+    return eth_amt;
+  };
 
-  const handle_submit = () => {
+  const handle_submit = async (e: FormEvent) => {
+    e.preventDefault();
+    const price_in_eth = await usd_to_eth(price_per_unit);
+    const price_in_wei = parseEther(String(price_in_eth));
     upload.mutate({
       name: name.trim(),
       price: price_in_wei.toString(),
@@ -117,7 +142,10 @@ export default function Dashboard() {
 
   const crop_form = (
     <div className=" absolute flex left-1/3 top-1/3 p-[50px]  bg-white lg:w-[500px] lg:h-[400px] shadow-2xl border-black-600">
-      <button className="flex absolute top-2 left-2 not-last:z-50 gap-2">
+      <button
+        className="flex absolute top-2 left-2 not-last:z-50 gap-2"
+        onClick={() => set_show_form(false)}
+      >
         <MdArrowBack size={24} />
         Back
       </button>
@@ -159,18 +187,20 @@ export default function Dashboard() {
           placeholder="enter available quantity"
           onChange={(e) => set_quantity(e.target.value)}
         ></input>
-        <p
-          className={`${
-            isSubmitting || upload.isPending || isConnected || error_message
-              ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-              : "bg-green-500 text-white hover:bg-green-600"
-          }`}
-        >
-          {get_status_message()}
-        </p>
+        {isSubmitting && (
+          <p
+            className={`${
+              isSubmitting || upload.isPending || isConnected || error_message
+                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                : "bg-green-500 text-white hover:bg-green-600"
+            }`}
+          >
+            {get_status_message()}
+          </p>
+        )}
         <button
           className={`w-full h-[50px] rounded font-medium transition-colors ${
-            isSubmitting || upload.isPending || !isConnected
+            isSubmitting || upload.isPending || !isConnected || !isConfirmed
               ? "bg-gray-300 text-gray-500 cursor-not-allowed"
               : "bg-green-500 text-white hover:bg-green-600"
           }`}

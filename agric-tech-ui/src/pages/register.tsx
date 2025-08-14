@@ -39,7 +39,7 @@ export default function RegisterFarm() {
         navigate("/dashboard");
       }, 1500);
     }
-  }, [isConfirmed, navigate]);
+  }, [isConfirmed]);
 
   useEffect(() => {
     if (isConfirmationError) {

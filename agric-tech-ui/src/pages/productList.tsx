@@ -6,6 +6,8 @@ import { useWriteContract } from "wagmi";
 import { useWaitForTransactionReceipt } from "wagmi";
 import { useMutation } from "@tanstack/react-query";
 import { parseEther } from "viem";
+import { formatEther } from "viem";
+import { CgShoppingCart } from "react-icons/cg";
 import { wagmiContractConfig } from "../contracts/contract";
 import Header from "../layout/header";
 
@@ -16,13 +18,16 @@ type product = {
   name: string;
   price: number;
   owner: string;
+  quantity: number;
 };
 
 export default function User_dashboard() {
   const { address, isConnected } = useAccount();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [celo_price, set_celo_price] = useState(0);
-  const [quantity, set_quantity] = useState<string | number>(1);
+  const [no_cart, set_no_cart] = useState(0);
+  const [celo_price, set_celo_price] = useState<string | number>("");
+  const [selected_product, set_selected_product] = useState<product[]>([]);
+  const [display_cart, set_display_cart] = useState(false);
   const [txHash, set_txHash] = useState<`0x${string}` | undefined>(undefined);
   const [available_products, set_available_products] = useState<product[]>([]);
 
@@ -48,18 +53,21 @@ export default function User_dashboard() {
         });
 
         const values = await Promise.all(products);
-        const result: product[] = values.map((item: any) => ({
-          id: item[0],
-          name: item[1],
-          owner: item[2],
-          price: item[3] && Number(item[3]),
-        }));
+        const result: product[] = await Promise.all(
+          values.map(async (item: any) => ({
+            id: item[0],
+            name: item[1],
+            owner: item[2],
+            price: item[3] ? await wei_to_usd(item[3]) : 0,
+            quantity: 0,
+          }))
+        );
         set_available_products(result);
       }
     }
 
     get_products();
-  }, [isConnected]);
+  }, [isConnected, product_count]);
 
   //confirm transaction
   const {
@@ -110,15 +118,15 @@ export default function User_dashboard() {
   const buy = useMutation({
     mutationFn: async (data: {
       crop_id: string;
-      quantity: string;
+      quantity: string | number;
       product: product;
     }) => {
       try {
         if (!isConnected) return;
 
         setIsSubmitting(true);
-        const dollar_price = data.product.price * Number(quantity);
-        const celo_amount = dollar_price / celo_price;
+        const dollar_price = data.product.price * Number(data.quantity);
+        const celo_amount = dollar_price / Number(celo_price);
         const celo_amount_inWei = parseEther(celo_amount.toString()); //convert to wei
         const hash = await writeContractAsync({
           ...wagmiContractConfig,
@@ -136,6 +144,18 @@ export default function User_dashboard() {
     },
   });
 
+  //convert wei to usd
+  const wei_to_usd = async (amt_in_wei: bigint) => {
+    const eth_amt = formatEther(amt_in_wei);
+    const res = await fetch(
+      "https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd"
+    );
+    const data = await res.json();
+    const eth_to_usd = data.ethereum.usd;
+    const amt_in_usd = Number(eth_amt) * eth_to_usd;
+    return amt_in_usd;
+  };
+
   function get_status_message() {
     if (isConfirmed) return "Transaction successful";
     if (buy.isPending && !txHash) return "preparing transaction...";
@@ -148,12 +168,64 @@ export default function User_dashboard() {
 
   function get_button_message() {
     if (buy.isPending) return "Preparing";
-    return "Buy product";
+    return "Add to cart";
   }
+
+  const carts = (
+    <section
+      className={`${display_cart ? "absolute top-1/3 left-1/3 w-1/3 h-1/2 p-3 shadow-2xl bg-white" : "hidden"}`}
+    >
+      <div className="grid grid-cols-3 gap-2 ">
+        {selected_product.map((product: product, id: number) => (
+          <div className="flex flex-col h-fit-content bg-gray-300 p-2" key={id}>
+            <img
+              className="w-10 h-10"
+              src="/images/metamask.svg"
+              alt={`${product.name}`}
+            ></img>
+            <p className="text-black font-bold text-lg">{product.name}</p>
+            <p className="text-black text-xs">USD {product.price}</p>
+            <p className="text-black text-xs">{`${product.owner.slice(0, 2)}...${product.owner.slice(-3)}`}</p>
+            <button
+              onClick={() => {
+                buy.mutate({
+                  quantity: product.quantity,
+                  crop_id: product.id,
+                  product,
+                });
+                console.log(product);
+              }}
+              className={`w-full h-[50px] rounded font-medium transition-colors ${
+                isSubmitting || buy.isPending || !isConnected
+                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                  : "bg-green-500 text-white hover:bg-green-600"
+              }`}
+            >
+              Proceed to Pay
+            </button>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
 
   return (
     <Header>
-      <button> View History</button>
+      <div className="flex flex-row">
+        <button> View History</button>
+        <div
+          className="relative"
+          onClick={() => no_cart > 0 && set_display_cart(!display_cart)}
+        >
+          <CgShoppingCart size={30} />
+          {no_cart > 0 && (
+            <div className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 rounded-full text-white text-xs flex items-center justify-center">
+              {no_cart}
+            </div>
+          )}
+        </div>
+      </div>
+
       {isLoading && <p>Loading available products</p>}
       <section className="max-w-screen p-3 mx-50 mt-[100px] shadow-2xl">
         {available_products.length == 0 && !isLoading ? (
@@ -173,16 +245,24 @@ export default function User_dashboard() {
                 <p className="text-black font-bold text-lg">{product.name}</p>
                 <p className="text-black text-xs">USD {product.price}</p>
                 <p className="text-black text-xs">{`${product.owner.slice(0, 2)}...${product.owner.slice(-3)}`}</p>
-                <div className="mb-2">
+                <div className="mb-2 mt-2">
                   <label htmlFor="quantity" className="text-xs text-black">
                     Quantity
                   </label>
                   <input
                     type="number"
                     min={1}
-                    onChange={(e) => set_quantity(e.target.value)}
-                    value={quantity}
+                    onChange={(e) => {
+                      const value = Number(e.target.value);
+                      set_available_products((prev) =>
+                        prev.map((p) =>
+                          Number(p.id) == id ? { ...p, quantity: value } : p
+                        )
+                      );
+                    }}
+                    value={product.quantity}
                     className="w-full px-2 py-1 text-xs border rounded"
+                    disabled={display_cart}
                   ></input>
                   {get_status_message() && (
                     <div
@@ -213,18 +293,25 @@ export default function User_dashboard() {
                     </div>
                   )}
                   <button
-                    onClick={() =>
-                      buy.mutate({
-                        quantity: quantity,
-                        crop_id: product.id,
-                        product,
-                      })
-                    }
+                    onClick={() => {
+                      set_selected_product([
+                        ...selected_product,
+                        {
+                          id: product.id,
+                          name: product.name,
+                          price: product.price,
+                          owner: product.owner,
+                          quantity: product.quantity,
+                        },
+                      ]);
+                      set_no_cart(no_cart + 1);
+                    }}
                     className={`w-full h-[50px] rounded font-medium transition-colors ${
                       isSubmitting || buy.isPending || !isConnected
                         ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                         : "bg-green-500 text-white hover:bg-green-600"
                     }`}
+                    disabled={display_cart}
                   >
                     {get_button_message()}
                   </button>
@@ -233,6 +320,7 @@ export default function User_dashboard() {
             ))}
           </div>
         )}
+        {carts}
       </section>
     </Header>
   );
