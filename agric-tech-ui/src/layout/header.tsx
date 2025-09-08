@@ -3,10 +3,8 @@ import { wagmiContractConfig } from "../contracts/contract";
 import WalletOptions from "../wallet-option";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useLocation } from "react-router-dom";
 
 function Header({ children }: { children?: React.ReactNode }) {
-  const location = useLocation();
   const { address, isConnected } = useAccount();
   //   const { connectors, connect, status, error } = useConnect();
   const { disconnect } = useDisconnect();
@@ -14,26 +12,29 @@ function Header({ children }: { children?: React.ReactNode }) {
   const [displayMenu, setDisplayMenu] = useState(false);
   const navigate = useNavigate();
 
-  const { data: isRegistered, isLoading } = useReadContract({
+  const { data: check_user_identity, isLoading } = useReadContract({
     ...wagmiContractConfig,
-    functionName: "isRegistered", // this must exist in your contract
+    functionName: "wallet_identity", // this must exist in your contract
     args: address ? [address] : [],
     query: { enabled: !!address },
   });
 
   useEffect(() => {
-    if (!isConnected || !address || isRegistered === undefined) {
+    if (!isConnected || !address || check_user_identity === undefined) {
       navigate("/homePage");
       return;
     }
 
-    if (isRegistered) {
-      navigate("/dashBoard");
-    }
-    // else if (!isRegistered && currentPath !== "/register") {
-    //   navigate("/register");
-    // }
-  }, [isConnected, address, isLoading, location.pathname, isRegistered]);
+    if (isConnected && check_user_identity === "farmer") {
+      navigate("/farmer_dashboard");
+    } else if (check_user_identity === "transporter") {
+      navigate("/transporter_dashboard");
+    } else if (check_user_identity === "storeManager") {
+      navigate("/store_dashboard");
+    } else if (check_user_identity === "admin") {
+      navigate("/admin_dashboard");
+    } else navigate("/apply_for_role");
+  }, [isConnected, address, isLoading, check_user_identity]);
 
   const navBar = (
     <div

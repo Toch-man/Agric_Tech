@@ -1,4 +1,10 @@
 import { useState } from "react";
+import { config } from "../../wagmi";
+import { wagmiContractConfig } from "../../contracts/contract";
+import { useReadContracts } from "wagmi";
+import { useWaitForTransactionReceipt } from "wagmi";
+import { useMutation } from "@tanstack/react-query";
+import { useWriteContract } from "wagmi";
 type request = {
   id: string;
   address: `0x${string}`;
@@ -7,6 +13,8 @@ type request = {
 };
 const Approve = () => {
   const [request, set_request] = useState<request[] | []>([]);
+
+  const { writeContractAsync } = useWriteContract();
   return (
     <div>
       <h1>Pending Requests</h1>
@@ -17,6 +25,10 @@ const Approve = () => {
               <td className="w-fit-content h-[5px] bg-gray-400 p-5">ID</td>
               <td className="w-fit-content h-[5px] bg-gray-400 p-5">
                 user_address
+              </td>
+              <td className="w-fit-content h-[5px] bg-gray-400 p-5">Name</td>
+              <td className="w-fit-content h-[5px] bg-gray-400 p-5">
+                location
               </td>
               <td className="w-fit-content h-[5px] bg-gray-400 p-5">
                 requested_role
