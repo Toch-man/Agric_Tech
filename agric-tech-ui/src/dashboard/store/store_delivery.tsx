@@ -8,6 +8,7 @@ import { useWaitForTransactionReceipt } from "wagmi";
 import { useMutation } from "@tanstack/react-query";
 import { useAccount } from "wagmi";
 import { delivery } from "./../transporter/transporter";
+import { Link } from "react-router-dom";
 
 const Store_deliveries = () => {
   const [deliveries, set_deliveries] = useState<delivery[] | []>([]);
@@ -21,7 +22,7 @@ const Store_deliveries = () => {
 
   const { data: delivery_count, isLoading } = useReadContract({
     ...wagmiContractConfig,
-    functionName: "delivery_count",
+    functionName: "get_delivery_count",
     query: { enabled: !!address },
   });
 
@@ -97,67 +98,71 @@ const Store_deliveries = () => {
       return "confirming transactioon";
   };
 
-  <div>
-    <h1>Assigned deliveries</h1>
-    <p>{get_status_message()}</p>
-    <section>
-      <table>
-        <thead>
-          <tr className=" bg-white w-full py-3 text-black text-[20px] font-bold">
-            <td className="w-fit-content h-[5px] bg-gray-400 p-5">ID</td>
-            <td className="w-fit-content h-[5px] bg-gray-400 p-5">
-              Product Name
-            </td>
-            <td className="w-fit-content h-[5px] bg-gray-400 p-5">
-              farmer_address
-            </td>
-            <td className="w-fit-content h-[5px] bg-gray-400 p-5">
-              Pick up location
-            </td>
-            <td className="w-fit-content h-[5px] bg-gray-400 p-5">
-              Destination
-            </td>
-            <td className="w-fit-content h-[5px] bg-gray-400 p-5">Action</td>
-          </tr>
-        </thead>
-        {isLoading ? (
-          <tr>
-            <td>Loading Date</td>
-          </tr>
-        ) : (
-          <tbody>
-            {deliveries.map((delivery, id) => (
-              <tr>
-                <td key={id}>{delivery.crop_id}</td>
-                <td key={id}>{delivery.name}</td>
-                <td key={id}>{delivery.farmer}</td>
-                <td key={id}>{delivery.pick_up_location}</td>
-                <td key={id}>{delivery.destination}</td>
-                <td key={id}>
-                  <input
-                    type="date"
-                    value={arrival_date}
-                    onChange={(e) => set_arrival_date(e.target.value)}
-                  ></input>
-                </td>
-                <td key={id}>
-                  <button
-                    className={`cursor-pointer ${arrival_date == undefined && "cursor-not-allowed opacity-50"}`}
-                    onClick={() =>
-                      confirm.mutate({
-                        id: delivery.crop_id,
-                        arrival_date: arrival_date!,
-                      })
-                    }
-                  >
-                    {get_button_message()}
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        )}
-      </table>
-    </section>
-  </div>;
+  return (
+    <div>
+      <h1>Assigned deliveries</h1>
+      <p>{get_status_message()}</p>
+      <Link to="/product_in_store">View product in store</Link>
+      <section>
+        <table>
+          <thead>
+            <tr className=" bg-white w-full py-3 text-black text-[20px] font-bold">
+              <td className="w-fit-content h-[5px] bg-gray-400 p-5">ID</td>
+              <td className="w-fit-content h-[5px] bg-gray-400 p-5">
+                Product Name
+              </td>
+              <td className="w-fit-content h-[5px] bg-gray-400 p-5">
+                farmer_address
+              </td>
+              <td className="w-fit-content h-[5px] bg-gray-400 p-5">
+                Pick up location
+              </td>
+              <td className="w-fit-content h-[5px] bg-gray-400 p-5">
+                Destination
+              </td>
+              <td className="w-fit-content h-[5px] bg-gray-400 p-5">Action</td>
+            </tr>
+          </thead>
+          {isLoading ? (
+            <tr>
+              <td>Loading Date</td>
+            </tr>
+          ) : (
+            <tbody>
+              {deliveries.map((delivery, id) => (
+                <tr>
+                  <td key={id}>{delivery.crop_id}</td>
+                  <td key={id}>{delivery.name}</td>
+                  <td key={id}>{delivery.farmer}</td>
+                  <td key={id}>{delivery.pick_up_location}</td>
+                  <td key={id}>{delivery.destination}</td>
+                  <td key={id}>
+                    <input
+                      type="date"
+                      value={arrival_date}
+                      onChange={(e) => set_arrival_date(e.target.value)}
+                    ></input>
+                  </td>
+                  <td key={id}>
+                    <button
+                      className={`cursor-pointer ${arrival_date == undefined && "cursor-not-allowed opacity-50"}`}
+                      onClick={() =>
+                        confirm.mutate({
+                          id: delivery.crop_id,
+                          arrival_date: arrival_date!,
+                        })
+                      }
+                    >
+                      {get_button_message()}
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          )}
+        </table>
+      </section>
+    </div>
+  );
 };
+export default Store_deliveries;

@@ -30,7 +30,7 @@ const Store_history = () => {
     async function get_store_history() {
       if (!isConnected) return;
       const count = Number(store_history_count);
-      const history = Array.from({ length: count }, (_, i) => {
+      const history = Array.from({ length: count }, () => {
         return readContract(config, {
           ...wagmiContractConfig,
           functionName: "get_store_history_byIndex",

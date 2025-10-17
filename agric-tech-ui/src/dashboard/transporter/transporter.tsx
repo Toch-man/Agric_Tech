@@ -1,18 +1,24 @@
 import { useEffect, useState } from "react";
-import { useReadContract, useWriteContract } from "wagmi";
-import { useAccount } from "wagmi";
-import { useWaitForTransactionReceipt } from "wagmi";
+import {
+  useReadContract,
+  useWriteContract,
+  useWaitForTransactionReceipt,
+  useAccount,
+} from "wagmi";
 import { readContract } from "wagmi/actions";
 import { config } from "../../wagmi";
 import { useMutation } from "@tanstack/react-query";
 import { wagmiContractConfig } from "../../contracts/contract";
+import { getUserName } from "../../get_user_name";
+import Header from "../../layout/header"; // same layout used in Farmer dashboard
 
 export type delivery = {
+  id: number;
   crop_id: string;
   name: string;
-  farmer: `0x${string}`;
+  farmer: string;
   transporter: `0x${string}`;
-  store: `0x${string}`;
+  store: string;
   pick_up_location: string;
   destination: string;
   quantity: number;
@@ -23,46 +29,15 @@ const Transporter_dashboard = () => {
   const { address, isConnected } = useAccount();
   const [is_submitting, set_isSubmitting] = useState(false);
   const [txHash, set_txHash] = useState<`0x${string}` | undefined>(undefined);
-
   const [deliveries, set_deliveries] = useState<delivery[] | []>([]);
 
   const { writeContractAsync } = useWriteContract();
 
   const { data: aval_delivery_count, isLoading } = useReadContract({
     ...wagmiContractConfig,
-    functionName: "delivery_count",
+    functionName: "get_delivery_count",
     query: { enabled: !!address },
   });
-  useEffect(() => {
-    async function get_deliveries() {
-      if (isConnected) {
-        const count = Number(aval_delivery_count);
-        const deliveries = Array.from({ length: count }, (_, i) => {
-          return readContract(config, {
-            ...wagmiContractConfig,
-            functionName: "get_delivery_byIndex",
-            args: [BigInt(i)],
-          });
-        });
-        const values = await Promise.all(deliveries);
-        const result: delivery[] = values
-          .filter((item: any) => item[3] === address) // keep only deliveries for this transporter
-          .map((item: any) => ({
-            crop_id: item[0],
-            name: item[1],
-            farmer: item[2],
-            transporter: item[3],
-            store: item[4],
-            pick_up_location: item[5],
-            destination: item[6],
-            quantity: item[7],
-            Status: item[8],
-          }));
-        set_deliveries(result);
-      }
-    }
-    get_deliveries();
-  }, [aval_delivery_count, isConnected, address]); //fetch deliveries
 
   const {
     isSuccess: isConfirmed,
@@ -74,10 +49,53 @@ const Transporter_dashboard = () => {
     query: { enabled: !!txHash, retry: 3, retryDelay: 1000 },
   });
 
+  useEffect(() => {
+    async function get_deliveries() {
+      if (isConnected) {
+        const count = Number(aval_delivery_count);
+        const deliveries = Array.from({ length: count }, (_, i) =>
+          readContract(config, {
+            ...wagmiContractConfig,
+            functionName: "get_delivery_byIndex",
+            args: [BigInt(i + 1)],
+          })
+        );
+        const values = await Promise.all(deliveries);
+
+        const result = await Promise.all(
+          values
+            .filter(
+              (item: any) => item[3]?.toLowerCase() === address?.toLowerCase()
+            )
+            .map(async (item: any): Promise<delivery> => {
+              const farmerName = await getUserName(item[3]);
+              const storeName = await getUserName(item[5]);
+
+              return {
+                id: item[0],
+                crop_id: item[1],
+                name: item[2],
+                farmer: farmerName,
+                transporter: item[4],
+                store: storeName,
+                pick_up_location: item[6],
+                destination: item[7],
+                quantity: Number(item[8]),
+                Status: item[9],
+              };
+            })
+        );
+
+        set_deliveries(result);
+      }
+    }
+    get_deliveries();
+  }, [aval_delivery_count, isConnected, address, isConfirmed]);
+
   const deliver = useMutation({
-    mutationFn: async (data: { id: string }) => {
+    mutationFn: async (data: { id: number }) => {
+      if (!isConnected) return;
       try {
-        if (!isConnected) return;
         set_isSubmitting(true);
         const deliver_hash = await writeContractAsync({
           ...wagmiContractConfig,
@@ -87,74 +105,108 @@ const Transporter_dashboard = () => {
         set_txHash(deliver_hash);
         set_isSubmitting(false);
       } catch (error) {
+        console.error(error);
         set_isSubmitting(false);
       }
     },
   });
 
-  const get_button_message = () => {
-    if (deliver.isPending || is_submitting) return "Preparing";
-    return "Deliver";
-  };
+  const get_button_message = () =>
+    deliver.isPending || is_submitting ? "Preparing..." : "Deliver";
 
   const get_status_message = () => {
     if (isConfirmed) return "Transaction successful";
-    if (isConfirmationError) return "Transaction failed try again";
-    if (deliver.isPending && !txHash) return "preparing transaction";
+    if (isConfirmationError) return "Transaction failed. Try again.";
+    if (deliver.isPending && !txHash) return "Preparing transaction...";
     if (txHash && !isConfirmationError && confirmationError)
-      return "confirming transactioon";
+      return "Confirming transaction...";
   };
+
   return (
-    <div>
-      <h1>Assigned deliveries</h1>
-      <p>{get_status_message()}</p>
-      <section>
-        <table>
-          <thead>
-            <tr className=" bg-white w-full py-3 text-black text-[20px] font-bold">
-              <td className="w-fit-content h-[5px] bg-gray-400 p-5">ID</td>
-              <td className="w-fit-content h-[5px] bg-gray-400 p-5">
-                Product Name
-              </td>
-              <td className="w-fit-content h-[5px] bg-gray-400 p-5">
-                farmer_address
-              </td>
-              <td className="w-fit-content h-[5px] bg-gray-400 p-5">
-                Pick up location
-              </td>
-              <td className="w-fit-content h-[5px] bg-gray-400 p-5">
-                Destination
-              </td>
-              <td className="w-fit-content h-[5px] bg-gray-400 p-5">Action</td>
-            </tr>
-          </thead>
-          {isLoading ? (
-            <tr>
-              <td>Loading Date</td>
-            </tr>
-          ) : (
-            <tbody>
-              {deliveries.map((delivery, id) => (
+    <Header>
+      <div className="p-4 md:p-8">
+        <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
+          <h1 className="text-2xl font-bold text-gray-800">
+            Transporter Dashboard
+          </h1>
+        </div>
+
+        <p className="text-sm text-gray-600 mb-4">{get_status_message()}</p>
+
+        <div className="overflow-x-auto bg-white rounded-lg shadow">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">
+                  Product ID
+                </th>
+                <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">
+                  Product Name
+                </th>
+                <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">
+                  Farmer
+                </th>
+                <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">
+                  Store
+                </th>
+                <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">
+                  Pick-up Location
+                </th>
+                <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">
+                  Destination
+                </th>
+                <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">
+                  Action
+                </th>
+              </tr>
+            </thead>
+
+            <tbody className="divide-y divide-gray-100">
+              {isLoading ? (
                 <tr>
-                  <td key={id}>{delivery.crop_id}</td>
-                  <td key={id}>{delivery.name}</td>
-                  <td key={id}>{delivery.farmer}</td>
-                  <td key={id}>{delivery.pick_up_location}</td>
-                  <td key={id}>{delivery.destination}</td>
-                  <td key={id}>
-                    <button
-                      onClick={() => deliver.mutate({ id: delivery.crop_id })}
-                    >
-                      {get_button_message()}
-                    </button>
+                  <td colSpan={6} className="text-center py-6 text-gray-500">
+                    Loading deliveries...
                   </td>
                 </tr>
-              ))}
+              ) : deliveries.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="text-center py-6 text-gray-500">
+                    No deliveries assigned.
+                  </td>
+                </tr>
+              ) : (
+                deliveries.map((delivery, id) => (
+                  <tr
+                    key={id}
+                    className={id % 2 === 0 ? "bg-white" : "bg-gray-50"}
+                  >
+                    <td className="px-4 py-3 text-sm">{delivery.crop_id}</td>
+                    <td className="px-4 py-3 text-sm">{delivery.name}</td>
+                    <td className="px-4 py-3 text-sm">{delivery.farmer}</td>
+                    <td className="px-4 py-3 text-sm">{delivery.store}</td>
+                    <td className="px-4 py-3 text-sm">
+                      {delivery.pick_up_location}
+                    </td>
+                    <td className="px-4 py-3 text-sm">
+                      {delivery.destination}
+                    </td>
+                    <td className="px-4 py-3 text-sm">
+                      <button
+                        onClick={() => deliver.mutate({ id: delivery.id })}
+                        className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded disabled:opacity-50"
+                        disabled={is_submitting}
+                      >
+                        {get_button_message()}
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
-          )}
-        </table>
-      </section>
-    </div>
+          </table>
+        </div>
+      </div>
+    </Header>
   );
 };
 

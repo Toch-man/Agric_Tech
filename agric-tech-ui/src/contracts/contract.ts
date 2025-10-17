@@ -1,153 +1,11 @@
 export const wagmiContractConfig = {
-  address: "0x681E022Ab75A14d547a13C1b3Fe0e644D228e55B" as `0x${string}`,
+  address: "0x1cc6Ebad310c23eEC78b8863FbD42e5049894EF3" as `0x${string}`,
+  sourceName: "contracts/agric-tech.sol",
   abi: [
     {
-      anonymous: false,
-      inputs: [
-        {
-          indexed: true,
-          internalType: "uint256",
-          name: "cropId",
-          type: "uint256",
-        },
-        {
-          indexed: true,
-          internalType: "address",
-          name: "buyer",
-          type: "address",
-        },
-        {
-          indexed: false,
-          internalType: "uint256",
-          name: "quantity",
-          type: "uint256",
-        },
-        {
-          indexed: false,
-          internalType: "uint256",
-          name: "price",
-          type: "uint256",
-        },
-      ],
-      name: "CropPurchased",
-      type: "event",
-    },
-    {
-      anonymous: false,
-      inputs: [
-        {
-          indexed: true,
-          internalType: "uint256",
-          name: "cropId",
-          type: "uint256",
-        },
-        {
-          indexed: false,
-          internalType: "string",
-          name: "name",
-          type: "string",
-        },
-        {
-          indexed: false,
-          internalType: "uint256",
-          name: "quantity",
-          type: "uint256",
-        },
-        {
-          indexed: false,
-          internalType: "uint256",
-          name: "pricePerUnit",
-          type: "uint256",
-        },
-        {
-          indexed: false,
-          internalType: "address",
-          name: "cropOwner",
-          type: "address",
-        },
-      ],
-      name: "CropUploaded",
-      type: "event",
-    },
-    {
-      anonymous: false,
-      inputs: [
-        {
-          indexed: true,
-          internalType: "uint256",
-          name: "farmerId",
-          type: "uint256",
-        },
-        {
-          indexed: true,
-          internalType: "address",
-          name: "farmerAddress",
-          type: "address",
-        },
-        {
-          indexed: false,
-          internalType: "string",
-          name: "name",
-          type: "string",
-        },
-        {
-          indexed: false,
-          internalType: "string",
-          name: "location",
-          type: "string",
-        },
-      ],
-      name: "FarmerRegistered",
-      type: "event",
-    },
-    {
-      anonymous: false,
-      inputs: [
-        {
-          indexed: true,
-          internalType: "uint256",
-          name: "product_listId",
-          type: "uint256",
-        },
-        {
-          indexed: false,
-          internalType: "string",
-          name: "name",
-          type: "string",
-        },
-        {
-          indexed: false,
-          internalType: "address",
-          name: "ownerAddress",
-          type: "address",
-        },
-        {
-          indexed: false,
-          internalType: "uint256",
-          name: "price",
-          type: "uint256",
-        },
-      ],
-      name: "new_crop_added",
-      type: "event",
-    },
-    {
-      inputs: [
-        {
-          internalType: "uint256",
-          name: "_cropId",
-          type: "uint256",
-        },
-        {
-          internalType: "uint256",
-          name: "quantityToBuy",
-          type: "uint256",
-        },
-      ],
-      name: "buyCrop",
-      outputs: [],
-      stateMutability: "payable",
-      type: "function",
+      inputs: [],
+      stateMutability: "nonpayable",
+      type: "constructor",
     },
     {
       inputs: [
@@ -157,7 +15,83 @@ export const wagmiContractConfig = {
           type: "uint256",
         },
       ],
-      name: "cropId",
+      name: "all_users",
+      outputs: [
+        {
+          internalType: "address",
+          name: "",
+          type: "address",
+        },
+      ],
+      stateMutability: "view",
+      type: "function",
+    },
+    {
+      inputs: [
+        {
+          internalType: "uint256",
+          name: "id",
+          type: "uint256",
+        },
+      ],
+      name: "approve_role",
+      outputs: [],
+      stateMutability: "nonpayable",
+      type: "function",
+    },
+    {
+      inputs: [
+        {
+          internalType: "address",
+          name: "_address",
+          type: "address",
+        },
+      ],
+      name: "check_application_result",
+      outputs: [
+        {
+          internalType: "bool",
+          name: "",
+          type: "bool",
+        },
+      ],
+      stateMutability: "view",
+      type: "function",
+    },
+    {
+      inputs: [
+        {
+          internalType: "uint256",
+          name: "cropId",
+          type: "uint256",
+        },
+        {
+          internalType: "uint256",
+          name: "arrival_date",
+          type: "uint256",
+        },
+      ],
+      name: "confirmArrival",
+      outputs: [],
+      stateMutability: "nonpayable",
+      type: "function",
+    },
+    {
+      inputs: [],
+      name: "cropCount",
+      outputs: [
+        {
+          internalType: "uint256",
+          name: "",
+          type: "uint256",
+        },
+      ],
+      stateMutability: "view",
+      type: "function",
+    },
+    {
+      inputs: [],
+      name: "crop_count",
       outputs: [
         {
           internalType: "uint256",
@@ -185,6 +119,11 @@ export const wagmiContractConfig = {
         },
         {
           internalType: "string",
+          name: "crop_id",
+          type: "string",
+        },
+        {
+          internalType: "string",
           name: "name",
           type: "string",
         },
@@ -195,18 +134,31 @@ export const wagmiContractConfig = {
         },
         {
           internalType: "uint256",
-          name: "pricePerUnit",
+          name: "price_per_unit",
           type: "uint256",
         },
         {
-          internalType: "address payable",
-          name: "cropOwner",
-          type: "address",
+          internalType: "uint256",
+          name: "harvestDate",
+          type: "uint256",
         },
         {
-          internalType: "enum AgricTech.Status",
-          name: "cropStatus",
-          type: "uint8",
+          internalType: "address",
+          name: "farmer",
+          type: "address",
+        },
+      ],
+      stateMutability: "view",
+      type: "function",
+    },
+    {
+      inputs: [],
+      name: "deliveryCount",
+      outputs: [
+        {
+          internalType: "uint256",
+          name: "",
+          type: "uint256",
         },
       ],
       stateMutability: "view",
@@ -215,16 +167,56 @@ export const wagmiContractConfig = {
     {
       inputs: [
         {
+          internalType: "address",
+          name: "",
+          type: "address",
+        },
+        {
           internalType: "uint256",
           name: "",
           type: "uint256",
         },
       ],
-      name: "farmerId",
+      name: "farmer_history",
       outputs: [
         {
           internalType: "uint256",
-          name: "",
+          name: "id",
+          type: "uint256",
+        },
+        {
+          internalType: "address",
+          name: "farmer",
+          type: "address",
+        },
+        {
+          internalType: "string",
+          name: "product_name",
+          type: "string",
+        },
+        {
+          internalType: "string",
+          name: "sent_to",
+          type: "string",
+        },
+        {
+          internalType: "address",
+          name: "store",
+          type: "address",
+        },
+        {
+          internalType: "string",
+          name: "through",
+          type: "string",
+        },
+        {
+          internalType: "address",
+          name: "transporter",
+          type: "address",
+        },
+        {
+          internalType: "uint256",
+          name: "date",
           type: "uint256",
         },
       ],
@@ -242,82 +234,17 @@ export const wagmiContractConfig = {
       name: "farmers",
       outputs: [
         {
-          internalType: "uint256",
-          name: "id",
-          type: "uint256",
-        },
-        {
           internalType: "address",
-          name: "farmerAddress",
+          name: "",
           type: "address",
-        },
-        {
-          internalType: "string",
-          name: "name",
-          type: "string",
-        },
-        {
-          internalType: "string",
-          name: "location",
-          type: "string",
         },
       ],
       stateMutability: "view",
       type: "function",
     },
     {
-      inputs: [
-        {
-          internalType: "address",
-          name: "_farmer",
-          type: "address",
-        },
-        {
-          internalType: "uint256",
-          name: "index",
-          type: "uint256",
-        },
-      ],
-      name: "getSupplyByIndex",
-      outputs: [
-        {
-          internalType: "uint256",
-          name: "id",
-          type: "uint256",
-        },
-        {
-          internalType: "address",
-          name: "customerAddress",
-          type: "address",
-        },
-        {
-          internalType: "string",
-          name: "nameOfProduct",
-          type: "string",
-        },
-        {
-          internalType: "uint256",
-          name: "quantity",
-          type: "uint256",
-        },
-        {
-          internalType: "uint256",
-          name: "totalCost",
-          type: "uint256",
-        },
-      ],
-      stateMutability: "view",
-      type: "function",
-    },
-    {
-      inputs: [
-        {
-          internalType: "address",
-          name: "_farmer",
-          type: "address",
-        },
-      ],
-      name: "getSupplyCount",
+      inputs: [],
+      name: "get_all_users_count",
       outputs: [
         {
           internalType: "uint256",
@@ -332,11 +259,11 @@ export const wagmiContractConfig = {
       inputs: [
         {
           internalType: "uint256",
-          name: "index",
+          name: "cropId",
           type: "uint256",
         },
       ],
-      name: "get_product_by_index",
+      name: "get_crop_byIndex",
       outputs: [
         {
           internalType: "uint256",
@@ -345,17 +272,376 @@ export const wagmiContractConfig = {
         },
         {
           internalType: "string",
+          name: "crop_id",
+          type: "string",
+        },
+        {
+          internalType: "string",
+          name: "name",
+          type: "string",
+        },
+        {
+          internalType: "uint256",
+          name: "quantity",
+          type: "uint256",
+        },
+        {
+          internalType: "uint256",
+          name: "harvestDate",
+          type: "uint256",
+        },
+        {
+          internalType: "address",
+          name: "farmer",
+          type: "address",
+        },
+      ],
+      stateMutability: "view",
+      type: "function",
+    },
+    {
+      inputs: [
+        {
+          internalType: "uint256",
+          name: "crop_id",
+          type: "uint256",
+        },
+      ],
+      name: "get_delivery_byIndex",
+      outputs: [
+        {
+          internalType: "uint256",
+          name: "id",
+          type: "uint256",
+        },
+        {
+          internalType: "string",
+          name: "cropId",
+          type: "string",
+        },
+        {
+          internalType: "string",
           name: "name",
           type: "string",
         },
         {
           internalType: "address",
-          name: "ownerAddress",
+          name: "farmer",
+          type: "address",
+        },
+        {
+          internalType: "address",
+          name: "transporter",
+          type: "address",
+        },
+        {
+          internalType: "address",
+          name: "store",
+          type: "address",
+        },
+        {
+          internalType: "string",
+          name: "pick_up_location",
+          type: "string",
+        },
+        {
+          internalType: "string",
+          name: "destination",
+          type: "string",
+        },
+        {
+          internalType: "uint256",
+          name: "quantity",
+          type: "uint256",
+        },
+        {
+          internalType: "enum FarmToStoreTraceability.Crop_Status",
+          name: "status",
+          type: "uint8",
+        },
+      ],
+      stateMutability: "view",
+      type: "function",
+    },
+    {
+      inputs: [],
+      name: "get_delivery_count",
+      outputs: [
+        {
+          internalType: "uint256",
+          name: "",
+          type: "uint256",
+        },
+      ],
+      stateMutability: "view",
+      type: "function",
+    },
+    {
+      inputs: [
+        {
+          internalType: "address",
+          name: "_farmer",
           type: "address",
         },
         {
           internalType: "uint256",
-          name: "price",
+          name: "index",
+          type: "uint256",
+        },
+      ],
+      name: "get_farmer_history_byIndex",
+      outputs: [
+        {
+          internalType: "uint256",
+          name: "id",
+          type: "uint256",
+        },
+        {
+          internalType: "address",
+          name: "farmer",
+          type: "address",
+        },
+        {
+          internalType: "string",
+          name: "product_name",
+          type: "string",
+        },
+        {
+          internalType: "string",
+          name: "sent_to",
+          type: "string",
+        },
+        {
+          internalType: "address",
+          name: "store",
+          type: "address",
+        },
+        {
+          internalType: "string",
+          name: "through",
+          type: "string",
+        },
+        {
+          internalType: "address",
+          name: "transporter",
+          type: "address",
+        },
+        {
+          internalType: "uint256",
+          name: "date",
+          type: "uint256",
+        },
+      ],
+      stateMutability: "view",
+      type: "function",
+    },
+    {
+      inputs: [
+        {
+          internalType: "address",
+          name: "_farmer",
+          type: "address",
+        },
+      ],
+      name: "get_farmer_history_count",
+      outputs: [
+        {
+          internalType: "uint256",
+          name: "",
+          type: "uint256",
+        },
+      ],
+      stateMutability: "view",
+      type: "function",
+    },
+    {
+      inputs: [
+        {
+          internalType: "uint256",
+          name: "id",
+          type: "uint256",
+        },
+      ],
+      name: "get_pending_request_byIndex",
+      outputs: [
+        {
+          internalType: "address",
+          name: "pending_address",
+          type: "address",
+        },
+        {
+          internalType: "string",
+          name: "name",
+          type: "string",
+        },
+        {
+          internalType: "string",
+          name: "location",
+          type: "string",
+        },
+        {
+          internalType: "enum FarmToStoreTraceability.Role",
+          name: "requestedRole",
+          type: "uint8",
+        },
+        {
+          internalType: "bool",
+          name: "isApproved",
+          type: "bool",
+        },
+        {
+          internalType: "bool",
+          name: "exists",
+          type: "bool",
+        },
+      ],
+      stateMutability: "view",
+      type: "function",
+    },
+    {
+      inputs: [],
+      name: "get_pending_request_count",
+      outputs: [
+        {
+          internalType: "uint256",
+          name: "",
+          type: "uint256",
+        },
+      ],
+      stateMutability: "view",
+      type: "function",
+    },
+    {
+      inputs: [
+        {
+          internalType: "uint256",
+          name: "product_id",
+          type: "uint256",
+        },
+      ],
+      name: "get_product_byIndex",
+      outputs: [
+        {
+          internalType: "string",
+          name: "crop_id",
+          type: "string",
+        },
+        {
+          internalType: "string",
+          name: "name",
+          type: "string",
+        },
+        {
+          internalType: "address",
+          name: "owner_address",
+          type: "address",
+        },
+        {
+          internalType: "address",
+          name: "transporter_address",
+          type: "address",
+        },
+        {
+          internalType: "address",
+          name: "store_address",
+          type: "address",
+        },
+        {
+          internalType: "uint256",
+          name: "harvestDate",
+          type: "uint256",
+        },
+        {
+          internalType: "uint256",
+          name: "quantity",
+          type: "uint256",
+        },
+        {
+          internalType: "uint256",
+          name: "price_per_unit",
+          type: "uint256",
+        },
+        {
+          internalType: "uint256",
+          name: "arrival_date",
+          type: "uint256",
+        },
+      ],
+      stateMutability: "view",
+      type: "function",
+    },
+    {
+      inputs: [
+        {
+          internalType: "address",
+          name: "_store",
+          type: "address",
+        },
+        {
+          internalType: "uint256",
+          name: "index",
+          type: "uint256",
+        },
+      ],
+      name: "get_store_history_byIndex",
+      outputs: [
+        {
+          internalType: "uint256",
+          name: "id",
+          type: "uint256",
+        },
+        {
+          internalType: "address",
+          name: "farmer",
+          type: "address",
+        },
+        {
+          internalType: "address",
+          name: "transporter",
+          type: "address",
+        },
+        {
+          internalType: "string",
+          name: "farmer_name",
+          type: "string",
+        },
+        {
+          internalType: "string",
+          name: "transporter_name",
+          type: "string",
+        },
+        {
+          internalType: "uint256",
+          name: "date",
+          type: "uint256",
+        },
+        {
+          internalType: "string",
+          name: "product_name",
+          type: "string",
+        },
+        {
+          internalType: "uint256",
+          name: "quantity",
+          type: "uint256",
+        },
+      ],
+      stateMutability: "view",
+      type: "function",
+    },
+    {
+      inputs: [
+        {
+          internalType: "address",
+          name: "_store",
+          type: "address",
+        },
+      ],
+      name: "get_store_history_count",
+      outputs: [
+        {
+          internalType: "uint256",
+          name: "",
           type: "uint256",
         },
       ],
@@ -364,7 +650,90 @@ export const wagmiContractConfig = {
     },
     {
       inputs: [],
-      name: "get_product_count",
+      name: "get_store_product_count",
+      outputs: [
+        {
+          internalType: "uint256",
+          name: "",
+          type: "uint256",
+        },
+      ],
+      stateMutability: "view",
+      type: "function",
+    },
+    {
+      inputs: [
+        {
+          internalType: "address",
+          name: "_transporter",
+          type: "address",
+        },
+        {
+          internalType: "uint256",
+          name: "index",
+          type: "uint256",
+        },
+      ],
+      name: "get_transporter_history_byIndex",
+      outputs: [
+        {
+          internalType: "uint256",
+          name: "id",
+          type: "uint256",
+        },
+        {
+          internalType: "address",
+          name: "farmer",
+          type: "address",
+        },
+        {
+          internalType: "address",
+          name: "store",
+          type: "address",
+        },
+        {
+          internalType: "string",
+          name: "farmer_name",
+          type: "string",
+        },
+        {
+          internalType: "string",
+          name: "store_name",
+          type: "string",
+        },
+        {
+          internalType: "string",
+          name: "crop_name",
+          type: "string",
+        },
+        {
+          internalType: "string",
+          name: "from",
+          type: "string",
+        },
+        {
+          internalType: "string",
+          name: "to",
+          type: "string",
+        },
+        {
+          internalType: "uint256",
+          name: "date",
+          type: "uint256",
+        },
+      ],
+      stateMutability: "view",
+      type: "function",
+    },
+    {
+      inputs: [
+        {
+          internalType: "address",
+          name: "_transporter",
+          type: "address",
+        },
+      ],
+      name: "get_transporter_history_count",
       outputs: [
         {
           internalType: "uint256",
@@ -383,38 +752,71 @@ export const wagmiContractConfig = {
           type: "address",
         },
       ],
-      name: "isRegistered",
+      name: "get_user_byAddress",
       outputs: [
         {
-          internalType: "bool",
-          name: "",
-          type: "bool",
+          internalType: "address",
+          name: "user_address",
+          type: "address",
+        },
+        {
+          internalType: "string",
+          name: "name",
+          type: "string",
+        },
+        {
+          internalType: "string",
+          name: "location",
+          type: "string",
+        },
+        {
+          internalType: "uint256",
+          name: "successful_delivery",
+          type: "uint256",
+        },
+        {
+          internalType: "enum FarmToStoreTraceability.Role",
+          name: "role",
+          type: "uint8",
         },
       ],
       stateMutability: "view",
       type: "function",
     },
     {
-      inputs: [],
-      name: "nextCropId",
-      outputs: [
+      inputs: [
         {
           internalType: "uint256",
-          name: "",
+          name: "index",
           type: "uint256",
         },
       ],
-      stateMutability: "view",
-      type: "function",
-    },
-    {
-      inputs: [],
-      name: "nextFarmerId",
+      name: "get_user_byIndex",
       outputs: [
         {
+          internalType: "address",
+          name: "user_address",
+          type: "address",
+        },
+        {
+          internalType: "string",
+          name: "name",
+          type: "string",
+        },
+        {
+          internalType: "string",
+          name: "location",
+          type: "string",
+        },
+        {
           internalType: "uint256",
-          name: "",
+          name: "successful_delivery",
           type: "uint256",
+        },
+        {
+          internalType: "enum FarmToStoreTraceability.Role",
+          name: "role",
+          type: "uint8",
         },
       ],
       stateMutability: "view",
@@ -422,7 +824,7 @@ export const wagmiContractConfig = {
     },
     {
       inputs: [],
-      name: "nextSupplyId",
+      name: "get_user_count",
       outputs: [
         {
           internalType: "uint256",
@@ -436,17 +838,83 @@ export const wagmiContractConfig = {
     {
       inputs: [
         {
-          internalType: "uint256",
-          name: "",
-          type: "uint256",
+          internalType: "address",
+          name: "_address",
+          type: "address",
         },
       ],
-      name: "product_listId",
+      name: "get_user_details",
       outputs: [
         {
-          internalType: "uint256",
+          internalType: "address",
+          name: "user_address",
+          type: "address",
+        },
+        {
+          internalType: "string",
+          name: "name",
+          type: "string",
+        },
+        {
+          internalType: "string",
+          name: "location",
+          type: "string",
+        },
+        {
+          internalType: "enum FarmToStoreTraceability.Role",
+          name: "role",
+          type: "uint8",
+        },
+      ],
+      stateMutability: "view",
+      type: "function",
+    },
+    {
+      inputs: [
+        {
+          internalType: "address",
+          name: "_address",
+          type: "address",
+        },
+      ],
+      name: "get_user_name",
+      outputs: [
+        {
+          internalType: "string",
           name: "",
-          type: "uint256",
+          type: "string",
+        },
+      ],
+      stateMutability: "view",
+      type: "function",
+    },
+    {
+      inputs: [
+        {
+          internalType: "enum FarmToStoreTraceability.Role",
+          name: "role",
+          type: "uint8",
+        },
+      ],
+      name: "list_user_address",
+      outputs: [
+        {
+          internalType: "address[]",
+          name: "",
+          type: "address[]",
+        },
+      ],
+      stateMutability: "view",
+      type: "function",
+    },
+    {
+      inputs: [],
+      name: "owner",
+      outputs: [
+        {
+          internalType: "address",
+          name: "",
+          type: "address",
         },
       ],
       stateMutability: "view",
@@ -460,12 +928,17 @@ export const wagmiContractConfig = {
           type: "uint256",
         },
       ],
-      name: "products",
+      name: "pendingDeliveries",
       outputs: [
         {
           internalType: "uint256",
           name: "id",
           type: "uint256",
+        },
+        {
+          internalType: "string",
+          name: "cropId",
+          type: "string",
         },
         {
           internalType: "string",
@@ -474,13 +947,38 @@ export const wagmiContractConfig = {
         },
         {
           internalType: "address",
-          name: "ownerAddress",
+          name: "farmer",
           type: "address",
         },
         {
+          internalType: "address",
+          name: "transporter",
+          type: "address",
+        },
+        {
+          internalType: "address",
+          name: "store",
+          type: "address",
+        },
+        {
+          internalType: "string",
+          name: "pick_up_location",
+          type: "string",
+        },
+        {
+          internalType: "string",
+          name: "destination",
+          type: "string",
+        },
+        {
           internalType: "uint256",
-          name: "price",
+          name: "quantity",
           type: "uint256",
+        },
+        {
+          internalType: "enum FarmToStoreTraceability.Crop_Status",
+          name: "status",
+          type: "uint8",
         },
       ],
       stateMutability: "view",
@@ -489,62 +987,41 @@ export const wagmiContractConfig = {
     {
       inputs: [
         {
-          internalType: "string",
-          name: "_nameOfProduct",
-          type: "string",
-        },
-        {
-          internalType: "address",
-          name: "_customerAddress",
-          type: "address",
-        },
-        {
           internalType: "uint256",
-          name: "_quantity",
-          type: "uint256",
-        },
-        {
-          internalType: "uint256",
-          name: "_totalCost",
-          type: "uint256",
-        },
-      ],
-      name: "recordSupply",
-      outputs: [],
-      stateMutability: "nonpayable",
-      type: "function",
-    },
-    {
-      inputs: [
-        {
-          internalType: "string",
-          name: "_name",
-          type: "string",
-        },
-        {
-          internalType: "string",
-          name: "_location",
-          type: "string",
-        },
-      ],
-      name: "registerFarmer",
-      outputs: [],
-      stateMutability: "nonpayable",
-      type: "function",
-    },
-    {
-      inputs: [
-        {
-          internalType: "address",
           name: "",
-          type: "address",
+          type: "uint256",
         },
       ],
-      name: "registeredFarmers",
+      name: "pendingUsers",
       outputs: [
         {
+          internalType: "address",
+          name: "pending_address",
+          type: "address",
+        },
+        {
+          internalType: "string",
+          name: "name",
+          type: "string",
+        },
+        {
+          internalType: "string",
+          name: "location",
+          type: "string",
+        },
+        {
+          internalType: "enum FarmToStoreTraceability.Role",
+          name: "requestedRole",
+          type: "uint8",
+        },
+        {
           internalType: "bool",
-          name: "",
+          name: "isApproved",
+          type: "bool",
+        },
+        {
+          internalType: "bool",
+          name: "exists",
           type: "bool",
         },
       ],
@@ -552,33 +1029,100 @@ export const wagmiContractConfig = {
       type: "function",
     },
     {
-      inputs: [
-        {
-          internalType: "address",
-          name: "",
-          type: "address",
-        },
+      inputs: [],
+      name: "pending_users_count",
+      outputs: [
         {
           internalType: "uint256",
           name: "",
           type: "uint256",
         },
       ],
-      name: "supplies",
+      stateMutability: "view",
+      type: "function",
+    },
+    {
+      inputs: [
+        {
+          internalType: "uint256",
+          name: "",
+          type: "uint256",
+        },
+      ],
+      name: "product_inStore",
       outputs: [
+        {
+          internalType: "string",
+          name: "crop_id",
+          type: "string",
+        },
+        {
+          internalType: "string",
+          name: "name",
+          type: "string",
+        },
+        {
+          internalType: "address",
+          name: "owner_address",
+          type: "address",
+        },
+        {
+          internalType: "address",
+          name: "transporter_address",
+          type: "address",
+        },
+        {
+          internalType: "address",
+          name: "store_address",
+          type: "address",
+        },
+        {
+          internalType: "uint256",
+          name: "harvestDate",
+          type: "uint256",
+        },
+        {
+          internalType: "uint256",
+          name: "quantity",
+          type: "uint256",
+        },
+        {
+          internalType: "uint256",
+          name: "price_per_unit",
+          type: "uint256",
+        },
+        {
+          internalType: "uint256",
+          name: "arrival_date",
+          type: "uint256",
+        },
+      ],
+      stateMutability: "view",
+      type: "function",
+    },
+    {
+      inputs: [
         {
           internalType: "uint256",
           name: "id",
           type: "uint256",
         },
+      ],
+      name: "product_inTransit",
+      outputs: [],
+      stateMutability: "nonpayable",
+      type: "function",
+    },
+    {
+      inputs: [
         {
-          internalType: "address",
-          name: "customerAddress",
-          type: "address",
+          internalType: "string",
+          name: "name",
+          type: "string",
         },
         {
           internalType: "string",
-          name: "nameOfProduct",
+          name: "product_id",
           type: "string",
         },
         {
@@ -588,7 +1132,198 @@ export const wagmiContractConfig = {
         },
         {
           internalType: "uint256",
-          name: "totalCost",
+          name: "_price",
+          type: "uint256",
+        },
+        {
+          internalType: "uint256",
+          name: "harvestDate",
+          type: "uint256",
+        },
+      ],
+      name: "registerCrop",
+      outputs: [],
+      stateMutability: "nonpayable",
+      type: "function",
+    },
+    {
+      inputs: [
+        {
+          internalType: "uint256",
+          name: "id",
+          type: "uint256",
+        },
+      ],
+      name: "reject_role",
+      outputs: [],
+      stateMutability: "nonpayable",
+      type: "function",
+    },
+    {
+      inputs: [
+        {
+          internalType: "uint256",
+          name: "",
+          type: "uint256",
+        },
+      ],
+      name: "rejected_roles",
+      outputs: [
+        {
+          internalType: "address",
+          name: "",
+          type: "address",
+        },
+      ],
+      stateMutability: "view",
+      type: "function",
+    },
+    {
+      inputs: [
+        {
+          internalType: "string",
+          name: "name",
+          type: "string",
+        },
+        {
+          internalType: "enum FarmToStoreTraceability.Role",
+          name: "role",
+          type: "uint8",
+        },
+        {
+          internalType: "string",
+          name: "_location",
+          type: "string",
+        },
+      ],
+      name: "request_for_role",
+      outputs: [],
+      stateMutability: "nonpayable",
+      type: "function",
+    },
+    {
+      inputs: [
+        {
+          internalType: "address",
+          name: "_address",
+          type: "address",
+        },
+      ],
+      name: "resign_user",
+      outputs: [],
+      stateMutability: "nonpayable",
+      type: "function",
+    },
+    {
+      inputs: [
+        {
+          internalType: "address",
+          name: "",
+          type: "address",
+        },
+      ],
+      name: "roles",
+      outputs: [
+        {
+          internalType: "enum FarmToStoreTraceability.Role",
+          name: "",
+          type: "uint8",
+        },
+      ],
+      stateMutability: "view",
+      type: "function",
+    },
+    {
+      inputs: [
+        {
+          internalType: "uint256",
+          name: "id",
+          type: "uint256",
+        },
+        {
+          internalType: "uint256",
+          name: "_quantity",
+          type: "uint256",
+        },
+        {
+          internalType: "address",
+          name: "_store",
+          type: "address",
+        },
+        {
+          internalType: "address",
+          name: "transporter",
+          type: "address",
+        },
+        {
+          internalType: "string",
+          name: "_pick_up_location",
+          type: "string",
+        },
+        {
+          internalType: "string",
+          name: "_destination",
+          type: "string",
+        },
+      ],
+      name: "send_to_transporter",
+      outputs: [],
+      stateMutability: "nonpayable",
+      type: "function",
+    },
+    {
+      inputs: [
+        {
+          internalType: "address",
+          name: "",
+          type: "address",
+        },
+        {
+          internalType: "uint256",
+          name: "",
+          type: "uint256",
+        },
+      ],
+      name: "store_history",
+      outputs: [
+        {
+          internalType: "uint256",
+          name: "id",
+          type: "uint256",
+        },
+        {
+          internalType: "address",
+          name: "farmer",
+          type: "address",
+        },
+        {
+          internalType: "address",
+          name: "transporter",
+          type: "address",
+        },
+        {
+          internalType: "string",
+          name: "farmer_name",
+          type: "string",
+        },
+        {
+          internalType: "string",
+          name: "transporter_name",
+          type: "string",
+        },
+        {
+          internalType: "uint256",
+          name: "date",
+          type: "uint256",
+        },
+        {
+          internalType: "string",
+          name: "product_name",
+          type: "string",
+        },
+        {
+          internalType: "uint256",
+          name: "quantity",
           type: "uint256",
         },
       ],
@@ -603,7 +1338,20 @@ export const wagmiContractConfig = {
           type: "uint256",
         },
       ],
-      name: "supplyId",
+      name: "store_managers",
+      outputs: [
+        {
+          internalType: "address",
+          name: "",
+          type: "address",
+        },
+      ],
+      stateMutability: "view",
+      type: "function",
+    },
+    {
+      inputs: [],
+      name: "store_product_count",
       outputs: [
         {
           internalType: "uint256",
@@ -617,24 +1365,155 @@ export const wagmiContractConfig = {
     {
       inputs: [
         {
+          internalType: "address",
+          name: "",
+          type: "address",
+        },
+        {
+          internalType: "uint256",
+          name: "",
+          type: "uint256",
+        },
+      ],
+      name: "transporter_history",
+      outputs: [
+        {
+          internalType: "uint256",
+          name: "id",
+          type: "uint256",
+        },
+        {
+          internalType: "address",
+          name: "farmer",
+          type: "address",
+        },
+        {
+          internalType: "address",
+          name: "store",
+          type: "address",
+        },
+        {
           internalType: "string",
-          name: "_name",
+          name: "farmer_name",
+          type: "string",
+        },
+        {
+          internalType: "string",
+          name: "store_name",
+          type: "string",
+        },
+        {
+          internalType: "string",
+          name: "crop_name",
+          type: "string",
+        },
+        {
+          internalType: "string",
+          name: "from",
+          type: "string",
+        },
+        {
+          internalType: "string",
+          name: "to",
           type: "string",
         },
         {
           internalType: "uint256",
-          name: "_pricePerUnit",
-          type: "uint256",
-        },
-        {
-          internalType: "uint256",
-          name: "_quantity",
+          name: "date",
           type: "uint256",
         },
       ],
-      name: "uploadCrop",
-      outputs: [],
-      stateMutability: "nonpayable",
+      stateMutability: "view",
+      type: "function",
+    },
+    {
+      inputs: [
+        {
+          internalType: "uint256",
+          name: "",
+          type: "uint256",
+        },
+      ],
+      name: "transporters",
+      outputs: [
+        {
+          internalType: "address",
+          name: "",
+          type: "address",
+        },
+      ],
+      stateMutability: "view",
+      type: "function",
+    },
+    {
+      inputs: [],
+      name: "user_count",
+      outputs: [
+        {
+          internalType: "uint256",
+          name: "",
+          type: "uint256",
+        },
+      ],
+      stateMutability: "view",
+      type: "function",
+    },
+    {
+      inputs: [
+        {
+          internalType: "address",
+          name: "",
+          type: "address",
+        },
+      ],
+      name: "users",
+      outputs: [
+        {
+          internalType: "address",
+          name: "user_address",
+          type: "address",
+        },
+        {
+          internalType: "string",
+          name: "name",
+          type: "string",
+        },
+        {
+          internalType: "string",
+          name: "location",
+          type: "string",
+        },
+        {
+          internalType: "uint256",
+          name: "successful_delivery",
+          type: "uint256",
+        },
+        {
+          internalType: "enum FarmToStoreTraceability.Role",
+          name: "role",
+          type: "uint8",
+        },
+      ],
+      stateMutability: "view",
+      type: "function",
+    },
+    {
+      inputs: [
+        {
+          internalType: "address",
+          name: "connected_address",
+          type: "address",
+        },
+      ],
+      name: "wallet_identity",
+      outputs: [
+        {
+          internalType: "string",
+          name: "",
+          type: "string",
+        },
+      ],
+      stateMutability: "view",
       type: "function",
     },
   ],
