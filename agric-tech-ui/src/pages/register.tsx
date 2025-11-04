@@ -1,4 +1,4 @@
-import Header from "../layout/header";
+import Header from "../layouts/header";
 import { useWriteContract } from "wagmi";
 import { useState, useEffect } from "react";
 import { wagmiContractConfig } from "../contracts/contract";
@@ -176,8 +176,8 @@ export default function RegisterFarm() {
                 isConfirmationError
                   ? "bg-red-100 text-red-700"
                   : isConfirmed
-                    ? "bg-green-100 text-green-700"
-                    : "bg-blue-100 text-blue-700"
+                  ? "bg-green-100 text-green-700"
+                  : "bg-blue-100 text-blue-700"
               }`}
             >
               {getStatusMessage()}

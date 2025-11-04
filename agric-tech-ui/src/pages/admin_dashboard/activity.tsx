@@ -3,13 +3,15 @@ import { useAccount, useReadContract } from "wagmi";
 import { readContract } from "wagmi/actions";
 import { wagmiContractConfig } from "../../contracts/contract";
 import { config } from "../../wagmi";
+import { getUserName } from "../../get_user_name";
 
 type delivery = {
-  id: string;
+  id: number;
+  crop_id: string;
   name: string;
-  farmer: `0x${string}`;
-  transporter: `0x${string}`;
-  store: `0x${string}`;
+  farmer: string;
+  transporter: string;
+  store: string;
   pick_up_location: string;
   destination: string;
   quantity: number;
@@ -21,7 +23,7 @@ const Activity = () => {
   const { address, isConnected } = useAccount();
   const { data: delivery_count, isLoading } = useReadContract({
     ...wagmiContractConfig,
-    functionName: "delivery_count",
+    functionName: "get_delivery_count",
     query: { enabled: !!address },
   });
 
@@ -33,21 +35,29 @@ const Activity = () => {
         return readContract(config, {
           ...wagmiContractConfig,
           functionName: "get_delivery_byIndex",
-          args: [BigInt(i)],
+          args: [BigInt(i + 1)],
         });
       });
       const values = await Promise.all(deliveries);
-      const result: delivery[] = values.map((item: any) => ({
-        id: item[0],
-        name: item[1],
-        farmer: item[2],
-        transporter: item[3],
-        store: item[4],
-        pick_up_location: item[5],
-        destination: item[6],
-        quantity: item[7],
-        status: item[8],
-      }));
+      const result = await Promise.all(
+        values.map(async (item: any): Promise<delivery> => {
+          const farmerName = await getUserName(item[3]);
+          const storeName = await getUserName(item[5]);
+          const transporterName = await getUserName(item[4]);
+          return {
+            id: item[0],
+            crop_id: item[1],
+            name: item[2],
+            farmer: farmerName,
+            transporter: transporterName,
+            store: storeName,
+            pick_up_location: item[6],
+            destination: item[7],
+            quantity: Number(item[8]),
+            status: item[9],
+          };
+        })
+      );
       set_deliveries(result);
     }
 
@@ -135,7 +145,7 @@ const Activity = () => {
                     className={id % 2 === 0 ? "bg-white" : "bg-gray-50"}
                   >
                     <td className="px-4 py-3 text-sm text-gray-700">
-                      {delivery.id}
+                      {delivery.crop_id}
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-700">
                       {delivery.name}

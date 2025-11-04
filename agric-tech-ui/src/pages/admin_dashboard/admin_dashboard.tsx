@@ -1,5 +1,5 @@
 import { useAccount } from "wagmi";
-import Header from "../../layout/header";
+import Header from "../../layouts/header";
 import { useNavigate } from "react-router-dom";
 
 export default function Admin_dashboard() {

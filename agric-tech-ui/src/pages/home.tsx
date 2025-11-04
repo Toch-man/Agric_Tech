@@ -1,4 +1,4 @@
-import Header from "../layout/header";
+import Header from "../layouts/header";
 
 export default function HomePage() {
   // this page depending on if the acct connected is from the admin ,a farme rtc

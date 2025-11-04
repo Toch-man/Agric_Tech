@@ -41,18 +41,21 @@ function Header({ children }: { children?: React.ReactNode }) {
 
     const userIdentity = check_user_identity as string;
     const routeMap: Record<string, string> = {
-      farmer: "/farmer_dashboard",
-      transporter: "/transporter_dashboard",
-      storeManager: "/store_dashboard",
+      farmer: "/farmer/dashboard",
+      transporter: "/transporter/dashboard",
+      storeManager: "/store/dashboard",
       admin: "/admin_dashboard",
       none: "/scan_product",
     };
 
     const targetRoute = routeMap[userIdentity];
     if (
-      location.pathname !== targetRoute &&
+      !location.pathname.startsWith(targetRoute) &&
       location.pathname !== "/apply_for_role" &&
-      location.pathname !== "/scan_product"
+      location.pathname !== "/scan_product" &&
+      location.pathname !== "/approve" &&
+      location.pathname !== "/list_users" &&
+      location.pathname !== "/activities"
     ) {
       navigate(targetRoute, { replace: true });
     }

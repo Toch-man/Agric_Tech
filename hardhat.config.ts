@@ -16,7 +16,7 @@ const config: HardhatUserConfig = {
   },
   networks: {
     celo: {
-      url: "https://alfajores-forno.celo-testnet.org",
+      url: "https://rpc.ankr.com/celo_sepolia",
       accounts: [process.env.PRIVATE_KEY!],
     },
   },

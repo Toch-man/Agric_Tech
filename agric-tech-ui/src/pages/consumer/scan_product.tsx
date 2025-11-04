@@ -5,7 +5,7 @@ import { readContract } from "wagmi/actions";
 import { wagmiContractConfig } from "../../contracts/contract";
 import { config } from "../../wagmi";
 import { getUserName } from "../../get_user_name";
-import Header from "../../layout/header";
+import Header from "../../layouts/header";
 
 type ProductChain = {
   crop_id: string;

@@ -4,14 +4,19 @@ import { useAccount } from "wagmi";
 import { Link } from "react-router-dom";
 import { readContract } from "wagmi/actions";
 import { config } from "../../wagmi";
+import { getUserName } from "../../get_user_name";
+
 import { wagmiContractConfig } from "../../contracts/contract";
 
 type product_details = {
   id: string;
   name: string;
-  owner_address: `0x${string}`;
-  transporter_address: `0x${string}`;
+  owner: string;
+  transporter: string;
+  store: string;
+  harvestDate: string;
   quantity: number;
+  price_per_unit: number;
   arrival_date: string;
 };
 
@@ -21,10 +26,16 @@ const Store_dashboard = () => {
   const [display_products, set_display_products] = useState<
     product_details[] | []
   >([]);
+  const [deliveryCount, set_delivery_count] = useState(0);
 
   const { data: product_count, isLoading } = useReadContract({
     ...wagmiContractConfig,
-    functionName: "store_product_count",
+    functionName: "get_store_product_count",
+    query: { enabled: !!address },
+  });
+  const { data: delivery_count } = useReadContract({
+    ...wagmiContractConfig,
+    functionName: "get_delivery_count",
     query: { enabled: !!address },
   });
 
@@ -42,25 +53,58 @@ const Store_dashboard = () => {
         return readContract(config, {
           ...wagmiContractConfig,
           functionName: "get_product_byIndex",
-          args: [BigInt(i)],
+
+          args: [BigInt(i + 1)],
         });
       });
 
       const values = await Promise.all(products);
-      const result: product_details[] = values.map((item: any) => ({
-        id: item[0]?.toString() || "",
-        name: item[1] || "",
-        owner_address: item[2] || "",
-        transporter_address: item[3] || "",
-        quantity: Number(item[4]) || 0,
-        arrival_date: item[5] || "",
-      }));
+      const result: product_details[] = await Promise.all(
+        values.map(async (item: any) => {
+          const farmer_name = await getUserName(item[2]);
+          const transporter_name = await getUserName(item[3]);
+          const store_name = await getUserName(item[4]);
+
+          const harvestTimestamp = Number(item[5]);
+          const harvest_date = new Date(harvestTimestamp).toLocaleDateString(
+            "en-US",
+            {
+              day: "numeric",
+              month: "short",
+              year: "numeric",
+            }
+          );
+
+          const arrivalTimestamp = Number(item[8]);
+          const arrival_date = new Date(arrivalTimestamp).toLocaleDateString(
+            "en-US",
+            {
+              day: "numeric",
+              month: "short",
+              year: "numeric",
+            }
+          );
+
+          return {
+            id: item[0]?.toString(),
+            name: item[1],
+            owner: farmer_name,
+            transporter: transporter_name,
+            store: store_name,
+            harvestDate: harvest_date,
+            quantity: Number(item[6]),
+            price_per_unit: Number(item[7]),
+            arrival_date: arrival_date,
+          };
+        })
+      );
 
       set_display_products(result);
+      set_delivery_count(Number(deliveryCount));
     }
 
     get_product_byIndex();
-  }, [address, isConnected, product_count]);
+  }, [address, isConnected, product_count, delivery_count]);
 
   return (
     <div className="min-h-screen bg-gray-50 p-4 lg:p-8">
@@ -75,13 +119,19 @@ const Store_dashboard = () => {
             {/* Navigation Links */}
             <div className="flex flex-col sm:flex-row gap-3">
               <Link
-                to=""
+                to="/store/deliveries"
                 className="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors duration-200"
               >
                 View Expecting Deliveries
               </Link>
               <Link
-                to=""
+                to="/store/product_in_store"
+                className="inline-flex items-center justify-center px-4 py-2 bg-green-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors duration-200"
+              >
+                Generate QR Code for product
+              </Link>
+              <Link
+                to="/store/history"
                 className="inline-flex items-center justify-center px-4 py-2 bg-gray-600 text-white font-medium rounded-lg hover:bg-gray-700 transition-colors duration-200"
               >
                 View History
@@ -149,10 +199,13 @@ const Store_dashboard = () => {
                       Product Name
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Owner Address
+                      Price per unit
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Transporter Address
+                      Owner
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Transporter
                     </th>
                     <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Quantity
@@ -174,11 +227,14 @@ const Store_dashboard = () => {
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         {product.name}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 font-mono">
-                        {`${product.owner_address.slice(0, 6)}...${product.owner_address.slice(-4)}`}
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {product.price_per_unit}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 font-mono">
-                        {`${product.transporter_address.slice(0, 6)}...${product.transporter_address.slice(-4)}`}
+                        {product.owner}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 font-mono">
+                        {product.transporter}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
@@ -224,7 +280,10 @@ const Store_dashboard = () => {
                           Owner
                         </p>
                         <p className="text-sm font-mono text-gray-900">
-                          {`${product.owner_address.slice(0, 8)}...${product.owner_address.slice(-6)}`}
+                          {`${product.owner.slice(
+                            0,
+                            8
+                          )}...${product.owner.slice(-6)}`}
                         </p>
                       </div>
 
@@ -233,7 +292,10 @@ const Store_dashboard = () => {
                           Transporter
                         </p>
                         <p className="text-sm font-mono text-gray-900">
-                          {`${product.transporter_address.slice(0, 8)}...${product.transporter_address.slice(-6)}`}
+                          {`${product.transporter.slice(
+                            0,
+                            8
+                          )}...${product.transporter.slice(-6)}`}
                         </p>
                       </div>
 
@@ -341,7 +403,9 @@ const Store_dashboard = () => {
                 <p className="text-sm font-medium text-gray-600">
                   Pending Deliveries
                 </p>
-                <p className="text-2xl font-semibold text-gray-900">0</p>
+                <p className="text-2xl font-semibold text-gray-900">
+                  {deliveryCount}
+                </p>
               </div>
             </div>
           </div>
@@ -370,10 +434,7 @@ const Store_dashboard = () => {
                   Active Transporters
                 </p>
                 <p className="text-2xl font-semibold text-gray-900">
-                  {
-                    new Set(display_products.map((p) => p.transporter_address))
-                      .size
-                  }
+                  {new Set(display_products.map((p) => p.transporter)).size}
                 </p>
               </div>
             </div>

@@ -3,7 +3,7 @@ import { useAccount, useWriteContract } from "wagmi";
 import { useMutation } from "@tanstack/react-query";
 import { wagmiContractConfig } from "../../contracts/contract";
 import { useWaitForTransactionReceipt } from "wagmi";
-import Header from "../../layout/header";
+import Header from "../../layouts/header";
 import { useNavigate } from "react-router-dom";
 
 const RequestRole = () => {

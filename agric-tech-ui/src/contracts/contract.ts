@@ -1,5 +1,5 @@
 export const wagmiContractConfig = {
-  address: "0x1cc6Ebad310c23eEC78b8863FbD42e5049894EF3" as `0x${string}`,
+  address: "0xa98917c87dEFF890a36682DfD674feA6A4236e87" as `0x${string}`,
   sourceName: "contracts/agric-tech.sol",
   abi: [
     {
@@ -147,6 +147,11 @@ export const wagmiContractConfig = {
           name: "farmer",
           type: "address",
         },
+        {
+          internalType: "enum FarmToStoreTraceability.Crop_Status",
+          name: "status",
+          type: "uint8",
+        },
       ],
       stateMutability: "view",
       type: "function",
@@ -291,9 +296,19 @@ export const wagmiContractConfig = {
           type: "uint256",
         },
         {
+          internalType: "uint256",
+          name: "price_per_unit",
+          type: "uint256",
+        },
+        {
           internalType: "address",
           name: "farmer",
           type: "address",
+        },
+        {
+          internalType: "enum FarmToStoreTraceability.Crop_Status",
+          name: "status",
+          type: "uint8",
         },
       ],
       stateMutability: "view",

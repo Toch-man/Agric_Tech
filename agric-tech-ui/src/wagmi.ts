@@ -1,12 +1,12 @@
 import { http, createConfig } from "wagmi";
-import { celoAlfajores } from "wagmi/chains";
+import { sepolia } from "wagmi/chains";
 import { injected } from "wagmi/connectors";
 
 export const config = createConfig({
-  chains: [celoAlfajores],
+  chains: [sepolia],
   connectors: [injected()],
   transports: {
-    [celoAlfajores.id]: http("https://alfajores-forno.celo-testnet.org"),
+    [sepolia.id]: http("https://rpc.ankr.com/celo_sepolia"),
   },
 });
 

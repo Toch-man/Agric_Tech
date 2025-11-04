@@ -15,10 +15,10 @@ type product = {
   owner: string;
   transporter: string;
   store: string;
-  harvestDate: number;
+  harvestDate: string;
   quantity: number;
   price_per_unit: number;
-  arrival_date: number;
+  arrival_date: string;
 };
 
 const Product_in_store = () => {
@@ -44,7 +44,7 @@ const Product_in_store = () => {
         readContract(config, {
           ...wagmiContractConfig,
           functionName: "get_product_byIndex",
-          args: [BigInt(i)],
+          args: [BigInt(i + 1)],
         })
       );
 
@@ -65,17 +65,38 @@ const Product_in_store = () => {
         values.map((p: any) => getUserName(p[4]))
       );
 
-      const result: product[] = values.map((item: any, i: number) => ({
-        crop_id: item[0],
-        name: item[1],
-        owner: String(farmer_name[i]),
-        transporter: String(transporter_name[i]),
-        store: String(store_name[i]),
-        harvestDate: Number(item[5]),
-        quantity: Number(item[6]),
-        price_per_unit: Number(item[7]),
-        arrival_date: Number(item[8]),
-      }));
+      const result: product[] = values.map((item: any, i: number) => {
+        const harvestTimestamp = Number(item[5]);
+        const harvest_date = new Date(harvestTimestamp).toLocaleDateString(
+          "en-US",
+          {
+            day: "numeric",
+            month: "short",
+            year: "numeric",
+          }
+        );
+
+        const arrivalTimestamp = Number(item[8]);
+        const arrival_date = new Date(arrivalTimestamp).toLocaleDateString(
+          "en-US",
+          {
+            day: "numeric",
+            month: "short",
+            year: "numeric",
+          }
+        );
+        return {
+          crop_id: item[0],
+          name: item[1],
+          owner: String(farmer_name[i]),
+          transporter: String(transporter_name[i]),
+          store: String(store_name[i]),
+          harvestDate: harvest_date,
+          quantity: Number(item[6]),
+          price_per_unit: Number(item[7]),
+          arrival_date: arrival_date,
+        };
+      });
       set_products(result);
       set_fetching(false);
     }
@@ -113,7 +134,9 @@ const Product_in_store = () => {
               <th className="p-3 text-left">Name</th>
               <th className="p-3 text-left">Farmer</th>
               <th className="p-3 text-left">Quantity</th>
-              <th className="p-3 text-left">Price</th>
+              <th className="p-3 text-left">Price_per_unit</th>
+              <th className="p-3 text-left">Harvest Date</th>
+              <th className="p-3 text-left">Arrival Date</th>
               <th className="p-3 text-left">Action</th>
             </tr>
           </thead>
@@ -138,6 +161,8 @@ const Product_in_store = () => {
                   <td className="p-3">{p.owner}</td>
                   <td className="p-3">{p.quantity}</td>
                   <td className="p-3">{p.price_per_unit}</td>
+                  <td className="p-3">{p.harvestDate}</td>
+                  <td className="p-3">{p.arrival_date}</td>
                   <td className="p-3">
                     <button
                       onClick={() => {

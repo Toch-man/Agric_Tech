@@ -86,7 +86,9 @@ const Farmer_history = () => {
               {farmer_history.map((chain, idx) => (
                 <tr
                   key={idx}
-                  className={`${idx % 2 === 0 ? "bg-gray-50" : "bg-white"} hover:bg-gray-100`}
+                  className={`${
+                    idx % 2 === 0 ? "bg-gray-50" : "bg-white"
+                  } hover:bg-gray-100`}
                 >
                   <td className="p-3">{chain.id}</td>
                   <td className="p-3">{chain.product_name}</td>

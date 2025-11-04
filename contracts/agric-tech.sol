@@ -60,6 +60,7 @@ contract FarmToStoreTraceability {
         uint price_per_unit;
         uint harvestDate;
         address farmer; 
+        Crop_Status status;
     }
 
     struct Deliveries{
@@ -141,57 +142,62 @@ contract FarmToStoreTraceability {
         pendingUsers[pending_users_count] = PendingRequest(msg.sender,name,_location,role,false,true);
     }
    
-function approve_role(uint id) public onlyOwner() {
+function approve_role(uint id) public onlyOwner {
     require(pendingUsers[id].exists, 'no such user');
     require(!pendingUsers[id].isApproved, 'request already approved');
-    
+
     PendingRequest storage pending = pendingUsers[id];
-    
-    // Store the address before deleting
-    address userAddress = pending.pending_address;
-    string memory userName = pending.name;
-    string memory userLocation = pending.location;
-    Role userRole = pending.requestedRole;
-    
+
     // Create the user
-    users[userAddress] = User(
-        userAddress,
-        userName,
-        userLocation,
+    users[pending.pending_address] = User(
+        pending.pending_address,
+        pending.name,
+        pending.location,
         0,
-        userRole
+        pending.requestedRole
     );
-    
-    //  Set the roles mapping for access control
-    roles[userAddress] = userRole;
-    
-    // Add to role-specific arrays
-    if(userRole == Role.Farmer) farmers.push(userAddress);
-    if(userRole == Role.Transporter) transporters.push(userAddress);
-    if(userRole == Role.Store_manager) store_managers.push(userAddress);
-    
-    // Add to all_users array
-    all_users.push(userAddress);
+
+    roles[pending.pending_address] = pending.requestedRole;
+    if (pending.requestedRole == Role.Farmer) farmers.push(pending.pending_address);
+    if (pending.requestedRole == Role.Transporter) transporters.push(pending.pending_address);
+    if (pending.requestedRole == Role.Store_manager) store_managers.push(pending.pending_address);
+
+    all_users.push(pending.pending_address);
     user_count++;
-    
-    // Delete pending request and decrement count 
-    delete pendingUsers[id];
-    pending_users_count--;
+
+    // mark as approved and clear exists but DO NOT decrement global counter
+    pending.isApproved = true;
+    pending.exists = false;
+    // Optional: delete pendingUsers[id];  // you can delete, but do NOT decrement pending_users_count
 }
 
-    function reject_role(uint id) public onlyOwner() {
-         require(pendingUsers[id].exists,'no such user');
-        require(!pendingUsers[id].isApproved,'request already approved');
-        PendingRequest storage pending = pendingUsers[id];
-        pending.isApproved = false;
-        rejected_roles.push(pending.pending_address);
-        delete pendingUsers[id];
-        pending_users_count--;
-    }
+
+   function reject_role(uint id) public onlyOwner {
+    require(pendingUsers[id].exists, 'no such user');
+    PendingRequest storage pending = pendingUsers[id];
+    pending.isApproved = false;
+    pending.exists = false;
+    rejected_roles.push(pending.pending_address);
+    // do not decrement pending_users_count
+}
+
     
-    function resign_user(address _address) public onlyOwner{
-        delete users[_address];
+   function resign_user(address _address) public onlyOwner {
+    delete users[_address];
+    roles[_address] = Role(uint8(0)); // optional: reset role
+
+    // Remove from all_users array
+    for (uint i = 0; i < all_users.length; i++) {
+        if (all_users[i] == _address) {
+            all_users[i] = all_users[all_users.length - 1];
+            all_users.pop();
+            break;
+        }
     }
+
+    user_count--;
+}
+
 
     //list users count
     function get_user_count() public view returns (uint){
@@ -230,7 +236,8 @@ function approve_role(uint id) public onlyOwner() {
             quantity: quantity,
             price_per_unit:_price,
             harvestDate: harvestDate,
-            farmer: msg.sender
+            farmer: msg.sender,
+            status: Crop_Status.Pick_Up
         });
     }
 
@@ -249,7 +256,7 @@ function approve_role(uint id) public onlyOwner() {
             pick_up_location:_pick_up_location,
             destination:_destination,
             quantity:_quantity,
-            status:Crop_Status.Pick_Up
+            status:Crop_Status.In_Transit
         }));
        
 
@@ -258,6 +265,8 @@ function approve_role(uint id) public onlyOwner() {
     //when the transporter click deliver button
     function product_inTransit(uint id)public onlyRole(Role.Transporter){
         Deliveries storage Dc = pendingDeliveries[id];
+        available_Crop storage crop = crops[id];
+        crop.status= Crop_Status.In_Transit;
         Dc.status=Crop_Status.In_Transit;
     }
 
@@ -272,11 +281,14 @@ function approve_role(uint id) public onlyOwner() {
         Deliveries storage delivery_crop = pendingDeliveries[cropId];
         available_Crop storage crop= crops[cropId];
       
-        delivery_crop.status = Crop_Status.Delivered;
+         crop.status = Crop_Status.Delivered;
+     delivery_crop.status = Crop_Status.Delivered;
+    delivery_crop.status = Crop_Status.Delivered;
+    
         users[msg.sender].successful_delivery += 1;
         users[delivery_crop.transporter].successful_delivery +=1;
         users[delivery_crop.farmer].successful_delivery +=1;
-        product_inStore[cropId] = product_in_store({
+        product_inStore[store_product_count] = product_in_store({
             crop_id:delivery_crop.cropId,
             name:delivery_crop.name,
             owner_address:delivery_crop.farmer,
@@ -322,6 +334,7 @@ function approve_role(uint id) public onlyOwner() {
             product_name:delivery_crop.name,
             quantity:delivery_crop.quantity
         }));
+      
     }
 
     //retruns array  of address for a specific role 
@@ -359,9 +372,9 @@ function approve_role(uint id) public onlyOwner() {
         return cropCount;
     }
     function get_crop_byIndex( uint cropId) public view returns(
-        uint id, string memory crop_id,string memory name,uint quantity,uint harvestDate, address farmer){
+        uint id, string memory crop_id,string memory name,uint quantity,uint harvestDate, uint price_per_unit, address farmer, Crop_Status status){
         available_Crop memory c= crops[cropId];
-        return (c.id,c.crop_id,c.name,c.quantity,c.harvestDate,c.farmer);
+        return (c.id,c.crop_id,c.name,c.quantity,c.harvestDate,c.price_per_unit,c.farmer,c.status);
     }
 
     function get_store_product_count()public view returns(uint){
