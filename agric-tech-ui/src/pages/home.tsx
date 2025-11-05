@@ -7,7 +7,7 @@ export default function HomePage() {
       <div className="bg-[url('/images/background.jpg')]  bg-cover bg-center  h-screen w-full">
         <div className="flex flex-col justify-center items-center h-full">
           <h1 className="text-[36px] lg:text-[46px] font-bold text-yellow-200">
-            Welcome to .... Farm to store tracker{" "}
+            Welcome to Asgard Farm to store tracker{" "}
           </h1>
           <br />
           <p className="text-[20px] lg:text-[31px]  font-bold text-yellow-200">
