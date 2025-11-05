@@ -9,5 +9,11 @@
     }
   ],
   "installCommand": "npm install --prefix agric-tech-ui",
-  "buildCommand": "npm run build --prefix agric-tech-ui"
+  "buildCommand": "npm run build --prefix agric-tech-ui",
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/agric-tech-ui/dist/index.html"
+    }
+  ]
 }
