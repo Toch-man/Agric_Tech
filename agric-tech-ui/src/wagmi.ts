@@ -6,7 +6,7 @@ export const config = createConfig({
   chains: [sepolia],
   connectors: [injected()],
   transports: {
-    [sepolia.id]: http("https://rpc.ankr.com/celo_sepolia"),
+    [sepolia.id]: http("https://forno.celo-sepolia.celo-testnet.org"),
   },
 });
 

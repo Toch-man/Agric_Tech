@@ -1,5 +1,5 @@
 export const wagmiContractConfig = {
-  address: "0xa98917c87dEFF890a36682DfD674feA6A4236e87" as `0x${string}`,
+  address: "0x681E022Ab75A14d547a13C1b3Fe0e644D228e55B" as `0x${string}`,
   sourceName: "contracts/agric-tech.sol",
   abi: [
     {
@@ -520,6 +520,65 @@ export const wagmiContractConfig = {
         {
           internalType: "uint256",
           name: "",
+          type: "uint256",
+        },
+      ],
+      stateMutability: "view",
+      type: "function",
+    },
+    {
+      inputs: [
+        {
+          internalType: "string",
+          name: "_crop_id",
+          type: "string",
+        },
+      ],
+      name: "get_product_byCropId",
+      outputs: [
+        {
+          internalType: "string",
+          name: "crop_id",
+          type: "string",
+        },
+        {
+          internalType: "string",
+          name: "name",
+          type: "string",
+        },
+        {
+          internalType: "address",
+          name: "owner_address",
+          type: "address",
+        },
+        {
+          internalType: "address",
+          name: "transporter_address",
+          type: "address",
+        },
+        {
+          internalType: "address",
+          name: "store_address",
+          type: "address",
+        },
+        {
+          internalType: "uint256",
+          name: "harvestDate",
+          type: "uint256",
+        },
+        {
+          internalType: "uint256",
+          name: "quantity",
+          type: "uint256",
+        },
+        {
+          internalType: "uint256",
+          name: "price_per_unit",
+          type: "uint256",
+        },
+        {
+          internalType: "uint256",
+          name: "arrival_date",
           type: "uint256",
         },
       ],

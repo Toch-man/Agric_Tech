@@ -399,6 +399,41 @@ function approve_role(uint id) public onlyOwner {
         ,p.harvestDate,p.quantity,p.price_per_unit,
         p.arrival_date);
     }
+
+    //to show scan result
+    function get_product_byCropId(string memory _crop_id) 
+    public 
+    view 
+    returns (
+        string memory crop_id,
+        string memory name,
+        address owner_address,
+        address transporter_address,
+        address store_address,
+        uint harvestDate,
+        uint quantity,
+        uint price_per_unit,
+        uint arrival_date
+    ) 
+{
+    for (uint i = 1; i <= store_product_count; i++) {
+        if (keccak256(bytes(product_inStore[i].crop_id)) == keccak256(bytes(_crop_id))) {
+            product_in_store memory p = product_inStore[i];
+            return (
+                p.crop_id,
+                p.name,
+                p.owner_address,
+                p.transporter_address,
+                p.store_address,
+                p.harvestDate,
+                p.quantity,
+                p.price_per_unit,
+                p.arrival_date
+            );
+        }
+    }
+    revert("Product not found");
+}
        
            // Get total number of pending role requests
     function get_pending_request_count() public view returns (uint) {

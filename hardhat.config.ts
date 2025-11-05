@@ -16,7 +16,7 @@ const config: HardhatUserConfig = {
   },
   networks: {
     celo: {
-      url: "https://rpc.ankr.com/celo_sepolia",
+      url: "https://forno.celo-sepolia.celo-testnet.org",
       accounts: [process.env.PRIVATE_KEY!],
     },
   },

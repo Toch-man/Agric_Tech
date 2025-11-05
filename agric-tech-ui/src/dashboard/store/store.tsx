@@ -8,7 +8,7 @@ import { getUserName } from "../../get_user_name";
 
 import { wagmiContractConfig } from "../../contracts/contract";
 
-type product_details = {
+export type product_details = {
   id: string;
   name: string;
   owner: string;

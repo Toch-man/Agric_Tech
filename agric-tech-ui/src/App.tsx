@@ -36,6 +36,7 @@ import Store_deliveries from "./dashboard/store/store_delivery";
 import FarmerLayout from "./layouts/farmer_layout";
 import TransporterLayout from "./layouts/transporter_layout";
 import StoreLayout from "./layouts/store_layout";
+import Scan_result from "./pages/consumer/scan_result";
 
 export default function App() {
   const { disconnect } = useDisconnect();
@@ -55,6 +56,7 @@ export default function App() {
         <Route path="/approve" element={<Approve />} />
         <Route path="/apply_for_role" element={<RequestRole />} />
         <Route path="/scan_product" element={<Scan_products />} />
+        <Route path="/product/:id" element={<Scan_result />} />
 
         {/*  Admin routes */}
         <Route path="/admin_dashboard" element={<Admin_dashboard />} />
