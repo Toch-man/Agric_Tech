@@ -1,14 +1,17 @@
-// src/global.d.ts
-
-// Tell TypeScript that the Buffer type should be available globally.
-import { Buffer } from "buffer";
-
-declare global {
-  interface GlobalThis {
-    // Add the Buffer property to globalThis and assign it the correct Buffer type.
-    Buffer: typeof Buffer;
+// 1. Declare the module 'buffer' to bring in its contents
+declare module "buffer" {
+  export class Buffer extends Uint8Array {
+    // ... (Buffer methods, which are auto-inferred from the import, but we need the class)
   }
 }
 
-// If this file is a module (has an import/export), this ensures it is treated globally.
+// 2. Extend GlobalThis to include the Buffer type
+declare global {
+  interface GlobalThis {
+    // Assign it the type of the Buffer class constructor
+    Buffer: typeof import("buffer").Buffer;
+  }
+}
+
+// 3. Keep the export to make the file a module
 export {};
