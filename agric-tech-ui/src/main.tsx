@@ -8,7 +8,7 @@ import "./index.css";
 import App from "./App.tsx";
 import { config } from "./wagmi.ts";
 
-globalThis.Buffer = Buffer;
+window.Buffer = Buffer;
 
 const queryClient = new QueryClient();
 
