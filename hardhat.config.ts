@@ -10,10 +10,11 @@ const config: HardhatUserConfig = {
     settings: {
       optimizer: {
         enabled: true,
-        runs: 200,
+        runs: 200, // low runs reduces code size
       },
     },
   },
+
   networks: {
     celo: {
       url: "https://forno.celo-sepolia.celo-testnet.org",

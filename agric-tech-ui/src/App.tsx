@@ -17,6 +17,7 @@ import Admin_dashboard from "./pages/admin_dashboard/admin_dashboard";
 import Activity from "./pages/admin_dashboard/activity";
 import List_user from "./pages/admin_dashboard/view_users";
 import Scan_products from "./pages/consumer/scan_product";
+import HowToUse from "./pages/consumer/how_to_user";
 
 //  Farmer
 import Farmer_dashboard from "./dashboard/farmer/farmer";
@@ -44,7 +45,7 @@ export default function App() {
   useEffect(() => {
     // Disconnect wallet once on first load
     disconnect();
-  }, [disconnect]);
+  }, []);
 
   return (
     <Router>
@@ -56,6 +57,7 @@ export default function App() {
         <Route path="/approve" element={<Approve />} />
         <Route path="/apply_for_role" element={<RequestRole />} />
         <Route path="/scan_product" element={<Scan_products />} />
+        <Route path="/how_to_use" element={<HowToUse />} />
         <Route path="/product/:id" element={<Scan_result />} />
 
         {/*  Admin routes */}

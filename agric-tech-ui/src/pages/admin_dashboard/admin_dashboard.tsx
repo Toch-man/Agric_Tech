@@ -22,7 +22,7 @@ export default function Admin_dashboard() {
               onClick={() => navigate("/approve")}
               disabled={!address}
             >
-              View Pending Roles
+              View Role Application
             </button>
             <button
               className={`w-[200px] h-[50px] bg-green-500 text-white font-semibold border-2 border-black rounded-lg shadow-md transition-all duration-300 hover:bg-green-600 hover:scale-105 ${

@@ -1,5 +1,5 @@
 export const wagmiContractConfig = {
-  address: "0x681E022Ab75A14d547a13C1b3Fe0e644D228e55B" as `0x${string}`,
+  address: "0x29d677728652230526cFdB529ca7B9884cF934Cb" as `0x${string}`,
   sourceName: "contracts/agric-tech.sol",
   abi: [
     {
@@ -454,11 +454,16 @@ export const wagmiContractConfig = {
       inputs: [
         {
           internalType: "address",
-          name: "_farmer",
+          name: "_user",
           type: "address",
         },
+        {
+          internalType: "enum FarmToStoreTraceability.Role",
+          name: "_role",
+          type: "uint8",
+        },
       ],
-      name: "get_farmer_history_count",
+      name: "get_history_count",
       outputs: [
         {
           internalType: "uint256",
@@ -704,25 +709,6 @@ export const wagmiContractConfig = {
       type: "function",
     },
     {
-      inputs: [
-        {
-          internalType: "address",
-          name: "_store",
-          type: "address",
-        },
-      ],
-      name: "get_store_history_count",
-      outputs: [
-        {
-          internalType: "uint256",
-          name: "",
-          type: "uint256",
-        },
-      ],
-      stateMutability: "view",
-      type: "function",
-    },
-    {
       inputs: [],
       name: "get_store_product_count",
       outputs: [
@@ -793,25 +779,6 @@ export const wagmiContractConfig = {
         {
           internalType: "uint256",
           name: "date",
-          type: "uint256",
-        },
-      ],
-      stateMutability: "view",
-      type: "function",
-    },
-    {
-      inputs: [
-        {
-          internalType: "address",
-          name: "_transporter",
-          type: "address",
-        },
-      ],
-      name: "get_transporter_history_count",
-      outputs: [
-        {
-          internalType: "uint256",
-          name: "",
           type: "uint256",
         },
       ],
@@ -904,40 +871,6 @@ export const wagmiContractConfig = {
           internalType: "uint256",
           name: "",
           type: "uint256",
-        },
-      ],
-      stateMutability: "view",
-      type: "function",
-    },
-    {
-      inputs: [
-        {
-          internalType: "address",
-          name: "_address",
-          type: "address",
-        },
-      ],
-      name: "get_user_details",
-      outputs: [
-        {
-          internalType: "address",
-          name: "user_address",
-          type: "address",
-        },
-        {
-          internalType: "string",
-          name: "name",
-          type: "string",
-        },
-        {
-          internalType: "string",
-          name: "location",
-          type: "string",
-        },
-        {
-          internalType: "enum FarmToStoreTraceability.Role",
-          name: "role",
-          type: "uint8",
         },
       ],
       stateMutability: "view",
@@ -1328,16 +1261,6 @@ export const wagmiContractConfig = {
           internalType: "address",
           name: "transporter",
           type: "address",
-        },
-        {
-          internalType: "string",
-          name: "_pick_up_location",
-          type: "string",
-        },
-        {
-          internalType: "string",
-          name: "_destination",
-          type: "string",
         },
       ],
       name: "send_to_transporter",

@@ -93,22 +93,13 @@ const List_user = () => {
       const results = await Promise.all(calls);
 
       // Filter out null results and zero addresses
-      const formatted: User[] = results
-        // .filter((item: any) => {
-        //   if (!item) return false;
-        //   const address = item[0];
-        //   // Check if address is not zero address
-        //   return (
-        //     address && address !== "0x0000000000000000000000000000000000000000"
-        //   );
-        // })
-        .map((item: any) => ({
-          user_address: item[0],
-          name: item[1] || "Unknown",
-          location: item[2] || "Unknown",
-          successful_delivery: Number(item[3]) || 0,
-          role: Number(item[4]) || 0,
-        }));
+      const formatted: User[] = results.map((item: any) => ({
+        user_address: item[0],
+        name: item[1] || "Unknown",
+        location: item[2] || "Unknown",
+        successful_delivery: Number(item[3]) || 0,
+        role: Number(item[4]) || 0,
+      }));
 
       setUsers(formatted);
     }

@@ -65,6 +65,7 @@ const Farmer_dashboard = () => {
     `0x${string}` | undefined
   >(undefined);
   const [txHash, set_txHash] = useState<`0x${string}` | undefined>(undefined);
+  const [farmerLocation, setFarmerLocation] = useState<string>("");
   const [display_delivery_form, set_display_delivery_form] = useState(false);
   const [display_upload_form, set_display_upload_form] = useState(false);
   const [delivery_details, set_delivery_details] = useState<
@@ -202,11 +203,10 @@ const Farmer_dashboard = () => {
       }
     },
   });
-
   const deliver = useMutation({
     mutationFn: async (data: deliverDetails) => {
       if (!isConnected) throw new Error("Wallet not connected");
-      console.log("Delivery data:", data);
+
       set_isSubmitting(true);
 
       try {
@@ -218,17 +218,20 @@ const Farmer_dashboard = () => {
             BigInt(data.quantity),
             data.store,
             data.transporter,
-            data.pick_up_location,
-            data.destination,
           ],
         });
         set_txHash(hash);
         set_isSubmitting(false);
-        set_delivery_details([]);
+
         return hash;
       } catch (error) {
         set_isSubmitting(false);
-        console.log(error);
+        console.error("Delivery error:", error);
+        alert(
+          `Delivery failed: ${
+            error instanceof Error ? error.message : "Unknown error"
+          }`
+        );
         throw error;
       }
     },
@@ -266,8 +269,10 @@ const Farmer_dashboard = () => {
             user_status = "Pick_Up";
           } else if (Number(item[7]) == 1) {
             user_status = "In_Transit";
-          } else {
+          } else if (Number(item[7]) == 2) {
             user_status = "Delivered";
+          } else {
+            user_status = "In_Farm";
           }
           const harvestTimestamp = Number(item[4]) * 1000;
           const harvestDate = new Date(harvestTimestamp).toLocaleDateString(
@@ -302,18 +307,56 @@ const Farmer_dashboard = () => {
     aval_products_count,
   ]);
 
+  //get farmer location
   useEffect(() => {
-    if (isConfirmed || isUploadConfirmed) {
+    async function fetchFarmerLocation() {
+      if (!address) return;
+      try {
+        const user: any = await readContract(config, {
+          ...wagmiContractConfig,
+          functionName: "get_user_byAddress",
+          args: [address],
+        });
+        setFarmerLocation(user[2]); // user[2] = location of farmer
+      } catch (err) {
+        console.error("Error fetching farmer location:", err);
+      }
+    }
+
+    fetchFarmerLocation();
+  }, [address]);
+
+  useEffect(() => {
+    if (isConfirmed) {
       const timer = setTimeout(() => {
         refetch();
         set_txHash(undefined);
         set_upload_txHash(undefined);
         set_isSubmitting(false);
+
+        set_display_delivery_form(false);
+        set_delivery_details([]);
+
+        alert("Delivery sent successfully!");
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+
+    if (isUploadConfirmed) {
+      const timer = setTimeout(() => {
+        refetch();
+        set_txHash(undefined);
+        set_upload_txHash(undefined);
+        set_isSubmitting(false);
+
+        set_upload_details([]);
+        set_display_upload_form(false);
+
+        alert("Crop uploaded successfully!");
       }, 3000);
       return () => clearTimeout(timer);
     }
   }, [isConfirmed, isUploadConfirmed, refetch]);
-
   function get_status_message() {
     if (isUploadConfirmed || isConfirmed)
       return "Transaction successful updating dashboard";
@@ -327,7 +370,8 @@ const Farmer_dashboard = () => {
   }
 
   function get_field_color(status: string) {
-    if (status == "Pick_Up") return `px-4 py-3 text-sm bg-gray-200`;
+    if (status == "Pick_Up" || "In_Farm")
+      return `px-4 py-3 text-sm bg-gray-200`;
     if (status == "In_Transit") return `px-4 py-3 text-sm bg-blue-200`;
     else return `px-4 py-3 text-sm bg-green-200`;
   }
@@ -347,7 +391,7 @@ const Farmer_dashboard = () => {
             Upload a Crop
           </button>
           <Link
-            to="/farmer_history"
+            to="/farmer/history"
             className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
           >
             View History
@@ -417,15 +461,27 @@ const Farmer_dashboard = () => {
                         onClick={() => {
                           set_display_delivery_form(true);
                           set_display_upload_form(false);
-
                           set_delivery_details([
                             {
                               ...delivery_details[0],
                               id: Number(crop.id),
+                              pick_up_location:
+                                farmerLocation || "Loading location...",
                             },
                           ]);
                         }}
-                        className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded"
+                        className={`bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded ${
+                          crop.status === "Delivered" ||
+                          crop.status === "In_Transit" ||
+                          crop.status === "Pick_Up"
+                            ? "cursor-not-allowed opacity-50"
+                            : ""
+                        }`}
+                        disabled={
+                          crop.status === "Delivered" ||
+                          crop.status === "In_Transit" ||
+                          crop.status === "Pick_Up"
+                        }
                       >
                         Send to Store
                       </button>
@@ -442,31 +498,34 @@ const Farmer_dashboard = () => {
         <div className="mt-6 p-4 bg-white rounded shadow">
           <h2 className="text-lg font-semibold mb-4">Delivery Details</h2>
           <form className="space-y-4">
-            <input
-              type="text"
-              placeholder="Pick-up location"
-              className="w-full border rounded p-2"
-              onChange={(e) =>
-                set_delivery_details([
-                  {
-                    ...delivery_details[0],
-                    pick_up_location: e.target.value,
-                  },
-                ])
-              }
-              value={delivery_details[0]?.pick_up_location || ""}
-            />
-            <input
-              type="text"
-              placeholder="Destination"
-              className="w-full border rounded p-2"
-              onChange={(e) =>
-                set_delivery_details([
-                  { ...delivery_details[0], destination: e.target.value },
-                ])
-              }
-              value={delivery_details[0]?.destination || ""}
-            />
+            {/* Optional: Show pickup location (readonly) */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Pickup Location (Auto-filled)
+              </label>
+              <input
+                type="text"
+                value={farmerLocation || "Loading..."}
+                readOnly
+                className="w-full border rounded p-2 bg-gray-100 cursor-not-allowed"
+              />
+            </div>
+
+            {/* Optional: Show destination (readonly) */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Destination (Auto-filled from store)
+              </label>
+              <input
+                type="text"
+                value={
+                  delivery_details[0]?.destination || "Select a store first"
+                }
+                readOnly
+                className="w-full border rounded p-2 bg-gray-100 cursor-not-allowed"
+              />
+            </div>
+
             <input
               type="number"
               placeholder="Quantity"
@@ -481,24 +540,30 @@ const Farmer_dashboard = () => {
               }
               value={delivery_details[0]?.quantity || ""}
             />
+
             <select
               className="w-full border rounded p-2"
-              onChange={(e) =>
+              onChange={(e) => {
+                const selectedStore = storeManagers.find(
+                  (s) => s.address === e.target.value
+                );
                 set_delivery_details([
                   {
                     ...delivery_details[0],
                     store: e.target.value as `0x${string}`,
+                    destination: selectedStore?.location || "",
                   },
-                ])
-              }
+                ]);
+              }}
             >
               <option value="">Select Store Manager</option>
               {storeManagers.map((s) => (
                 <option key={s.address} value={s.address}>
-                  {s.name}
+                  {s.name}, based in {s.location}
                 </option>
               ))}
             </select>
+
             <select
               className="w-full border rounded p-2"
               onChange={(e) =>
@@ -513,7 +578,7 @@ const Farmer_dashboard = () => {
               <option value="">Select Transporter</option>
               {transporters.map((t) => (
                 <option key={t.address} value={t.address}>
-                  {t.name}
+                  {t.name}, based in {t.location}
                 </option>
               ))}
             </select>
@@ -522,12 +587,34 @@ const Farmer_dashboard = () => {
             <button
               onClick={(e) => {
                 e.preventDefault();
+
+                if (!delivery_details[0]?.store) {
+                  alert("Please select a store manager");
+                  return;
+                }
+                if (!delivery_details[0]?.transporter) {
+                  alert("Please select a transporter");
+                  return;
+                }
+                if (
+                  !delivery_details[0]?.quantity ||
+                  delivery_details[0].quantity <= 0
+                ) {
+                  alert("Please enter a valid quantity");
+                  return;
+                }
+
                 deliver.mutate(delivery_details[0]);
-                refetch();
               }}
               className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded disabled:opacity-50"
               type="submit"
-              disabled={isSubmitting || deliver.isPending}
+              disabled={
+                isSubmitting ||
+                deliver.isPending ||
+                !delivery_details[0]?.store ||
+                !delivery_details[0]?.transporter ||
+                !delivery_details[0]?.quantity
+              }
             >
               {get_button_message()}
             </button>

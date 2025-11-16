@@ -30,7 +30,11 @@ const Store_deliveries = () => {
   });
   const { writeContractAsync } = useWriteContract();
 
-  const { data: delivery_count, isLoading } = useReadContract({
+  const {
+    data: delivery_count,
+    isLoading,
+    refetch,
+  } = useReadContract({
     ...wagmiContractConfig,
     functionName: "get_delivery_count",
     query: { enabled: !!address },
@@ -45,6 +49,19 @@ const Store_deliveries = () => {
     confirmations: 1,
     query: { enabled: !!txHash, retry: 3, retryDelay: 1000 },
   });
+
+  // Update the page after successful confirmation
+  useEffect(() => {
+    if (isConfirmed) {
+      const timer = setTimeout(() => {
+        refetch(); // Refetch delivery count
+        set_txHash(undefined); // Reset transaction hash
+        set_isSubmitting(false);
+        alert("Delivery confirmed successfully!");
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [isConfirmed, refetch]);
 
   useEffect(() => {
     if (isConfirmed && confirmDialog.delivery) {
@@ -123,7 +140,7 @@ const Store_deliveries = () => {
   };
 
   const get_status_message = () => {
-    if (isConfirmed) return "Transaction successful";
+    if (isConfirmed) return "Transaction successful - Updating...";
     if (isConfirmationError) return "Transaction failed. Try again.";
     if (confirm.isPending && !txHash) return "Preparing transaction...";
     if (txHash && !isConfirmationError && confirmationError)

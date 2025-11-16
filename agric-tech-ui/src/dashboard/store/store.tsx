@@ -26,18 +26,56 @@ const Store_dashboard = () => {
   const [display_products, set_display_products] = useState<
     product_details[] | []
   >([]);
-  const [deliveryCount, set_delivery_count] = useState(0);
+  const [pendingDeliveryCount, setPendingDeliveryCount] = useState(0);
 
   const { data: product_count, isLoading } = useReadContract({
     ...wagmiContractConfig,
     functionName: "get_store_product_count",
     query: { enabled: !!address },
   });
+
   const { data: delivery_count } = useReadContract({
     ...wagmiContractConfig,
     functionName: "get_delivery_count",
     query: { enabled: !!address },
   });
+
+  // Fetch and calculate pending deliveries
+  useEffect(() => {
+    async function getPendingDeliveries() {
+      if (!isConnected || !address || !delivery_count) {
+        setPendingDeliveryCount(0);
+        return;
+      }
+
+      const count = Number(delivery_count);
+      if (count === 0) {
+        setPendingDeliveryCount(0);
+        return;
+      }
+
+      const deliveries = Array.from({ length: count }, (_, i) => {
+        return readContract(config, {
+          ...wagmiContractConfig,
+          functionName: "get_delivery_byIndex",
+          args: [BigInt(i + 1)],
+        });
+      });
+
+      const values = await Promise.all(deliveries);
+
+      // Filter deliveries assigned to this store and not yet delivered (Status !== "2")
+      const pendingDeliveries = values.filter(
+        (item: any) =>
+          item[5]?.toLowerCase() === address?.toLowerCase() &&
+          String(item[9]) !== "2"
+      );
+
+      setPendingDeliveryCount(pendingDeliveries.length);
+    }
+
+    getPendingDeliveries();
+  }, [address, isConnected, delivery_count]);
 
   useEffect(() => {
     async function get_product_byIndex() {
@@ -53,7 +91,6 @@ const Store_dashboard = () => {
         return readContract(config, {
           ...wagmiContractConfig,
           functionName: "get_product_byIndex",
-
           args: [BigInt(i + 1)],
         });
       });
@@ -100,7 +137,6 @@ const Store_dashboard = () => {
       );
 
       set_display_products(result);
-      set_delivery_count(Number(deliveryCount));
     }
 
     get_product_byIndex();
@@ -404,7 +440,7 @@ const Store_dashboard = () => {
                   Pending Deliveries
                 </p>
                 <p className="text-2xl font-semibold text-gray-900">
-                  {deliveryCount}
+                  {pendingDeliveryCount}
                 </p>
               </div>
             </div>

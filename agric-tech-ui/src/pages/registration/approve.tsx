@@ -117,6 +117,7 @@ const Approve = () => {
   const approve = useMutation({
     mutationFn: async (data: { id: number; userAddress: `0x${string}` }) => {
       if (!isConnected) return;
+
       setIsSubmitting(true);
       try {
         const hash = await writeContractAsync({
@@ -359,7 +360,11 @@ const Approve = () => {
                             })
                           }
                           disabled={isSubmitting}
-                          className="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                          className={`${
+                            req.isApproved
+                              ? "cursor-not-allowed opacity-50"
+                              : ""
+                          }inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors`}
                         >
                           <svg
                             className="w-4 h-4 mr-2"
@@ -476,7 +481,9 @@ const Approve = () => {
                         })
                       }
                       disabled={isSubmitting}
-                      className="flex-1 flex items-center justify-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      className={`${
+                        req.isApproved ? "cursor-not-allowed opacity-50" : ""
+                      }flex-1 flex items-center justify-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors`}
                     >
                       <svg
                         className="w-4 h-4 mr-2"

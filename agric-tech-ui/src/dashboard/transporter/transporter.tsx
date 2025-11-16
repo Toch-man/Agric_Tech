@@ -10,6 +10,7 @@ import { config } from "../../wagmi";
 import { useMutation } from "@tanstack/react-query";
 import { wagmiContractConfig } from "../../contracts/contract";
 import { getUserName } from "../../get_user_name";
+import { Link } from "react-router-dom";
 
 export type delivery = {
   id: number;
@@ -69,8 +70,11 @@ const Transporter_dashboard = () => {
         const result = await Promise.all(
           values
             .filter(
-              (item: any) => item[4]?.toLowerCase() === address?.toLowerCase()
+              (item: any) =>
+                item[4]?.toLowerCase() === address?.toLowerCase() &&
+                Number(item[9]) !== 2 // 2 means Delivered
             )
+
             .map(async (item: any): Promise<delivery> => {
               const farmerName = await getUserName(item[3]);
               const storeName = await getUserName(item[5]);
@@ -142,6 +146,12 @@ const Transporter_dashboard = () => {
         <h1 className="text-2xl font-bold text-gray-800">
           Transporter Dashboard
         </h1>
+        <Link
+          to="/transporter/history"
+          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
+        >
+          View History
+        </Link>
       </div>
 
       <p className="text-sm text-gray-600 mb-4">{get_status_message()}</p>

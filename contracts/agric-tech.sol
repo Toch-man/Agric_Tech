@@ -3,7 +3,7 @@ pragma solidity ^0.8.28;
 
 contract FarmToStoreTraceability {
     enum Role {  Farmer, Transporter, Store_manager }
-    enum Crop_Status { Pick_Up,In_Transit,Delivered}
+    enum Crop_Status {Pick_Up,In_Transit,Delivered,In_Farm}
     struct User {
         address user_address;
         string name;
@@ -115,7 +115,7 @@ contract FarmToStoreTraceability {
      
 
     modifier onlyRole(Role role) {
-        require(roles[msg.sender] == role, "Access denied: wrong role");
+        require(roles[msg.sender] == role, "Access denied");
         _;
     }
 
@@ -135,16 +135,13 @@ contract FarmToStoreTraceability {
 
     function request_for_role(string memory name, Role role,string memory _location) public {
         
-        // require(!pendingUsers[msg.sender].exists,'already requested');
-        // require(role != Role.None ,'invalid role');
-        // require(!pendingUsers[msg.sender].isApproved,'request already approved');
         pending_users_count++;
         pendingUsers[pending_users_count] = PendingRequest(msg.sender,name,_location,role,false,true);
     }
    
 function approve_role(uint id) public onlyOwner {
-    require(pendingUsers[id].exists, 'no such user');
-    require(!pendingUsers[id].isApproved, 'request already approved');
+    require(pendingUsers[id].exists, 'no user');
+    require(!pendingUsers[id].isApproved, 'already approved');
 
     PendingRequest storage pending = pendingUsers[id];
 
@@ -170,7 +167,6 @@ function approve_role(uint id) public onlyOwner {
     pending.exists = false;
     // Optional: delete pendingUsers[id];  // you can delete, but do NOT decrement pending_users_count
 }
-
 
    function reject_role(uint id) public onlyOwner {
     require(pendingUsers[id].exists, 'no such user');
@@ -237,30 +233,32 @@ function approve_role(uint id) public onlyOwner {
             price_per_unit:_price,
             harvestDate: harvestDate,
             farmer: msg.sender,
-            status: Crop_Status.Pick_Up
+            status: Crop_Status.In_Farm
         });
     }
 
     //when farmer clicks deliver  run this function
-    function send_to_transporter( uint id, uint _quantity,address _store,address transporter, string memory _pick_up_location, string memory _destination) public onlyRole(Role.Farmer){
-        available_Crop storage crop = crops[id];
-        require(crop.farmer == msg.sender, "Not your crop");
-        deliveryCount++;
-        pendingDeliveries[deliveryCount] = (Deliveries({
-            id:deliveryCount,
-            cropId:crop.crop_id,
-            name:crop.name,
-            farmer:msg.sender,
-            transporter:transporter,
-            store:_store,
-            pick_up_location:_pick_up_location,
-            destination:_destination,
-            quantity:_quantity,
-            status:Crop_Status.In_Transit
-        }));
-       
+function send_to_transporter(uint id, uint _quantity, address _store, address transporter) public onlyRole(Role.Farmer){
+    available_Crop storage crop = crops[id];
+    require(crop.farmer == msg.sender, "Not your crop");
+    
 
-    }
+    crop.status = Crop_Status.Pick_Up;
+    
+    deliveryCount++;
+    pendingDeliveries[deliveryCount] = (Deliveries({
+        id:deliveryCount,
+        cropId:crop.crop_id,
+        name:crop.name,
+        farmer:msg.sender,
+        transporter:transporter,
+        store:_store,
+        pick_up_location: users[msg.sender].location,
+        destination: users[_store].location,
+        quantity:_quantity,
+        status:Crop_Status.Pick_Up  
+    }));
+}
 
     //when the transporter click deliver button
     function product_inTransit(uint id)public onlyRole(Role.Transporter){
@@ -279,11 +277,11 @@ function approve_role(uint id) public onlyOwner {
         store_product_count++;
        
         Deliveries storage delivery_crop = pendingDeliveries[cropId];
-        available_Crop storage crop= crops[cropId];
+        available_Crop storage crop= crops[delivery_crop.id];
       
          crop.status = Crop_Status.Delivered;
-     delivery_crop.status = Crop_Status.Delivered;
-    delivery_crop.status = Crop_Status.Delivered;
+         delivery_crop.status = Crop_Status.Delivered;
+         delivery_crop.status = Crop_Status.Delivered;
     
         users[msg.sender].successful_delivery += 1;
         users[delivery_crop.transporter].successful_delivery +=1;
@@ -305,7 +303,7 @@ function approve_role(uint id) public onlyOwner {
             id:farmer_history[delivery_crop.farmer].length+1,
             farmer:delivery_crop.farmer,
             product_name:delivery_crop.name,
-            sent_to: users[delivery_crop.farmer].name,
+            sent_to: users[delivery_crop.store].name,
             store:delivery_crop.store,
             through:users[delivery_crop.transporter].name,
             transporter:delivery_crop.transporter,
@@ -328,7 +326,7 @@ function approve_role(uint id) public onlyOwner {
             id:store_history[msg.sender].length+1,
             farmer:delivery_crop.farmer,
             transporter:delivery_crop.transporter,
-            farmer_name:users[msg.sender].name,
+            farmer_name:users[delivery_crop.farmer].name,
             transporter_name:users[delivery_crop.transporter].name,
             date:arrival_date,
             product_name:delivery_crop.name,
@@ -465,18 +463,12 @@ function approve_role(uint id) public onlyOwner {
         );
     }
 
-    //fetch list of available users
-    function get_user_details(address _address) public view returns(
-        address user_address,
-         string memory name,
-         string memory location,
-         Role role){
-        User memory u = users[_address];
-        return(u.user_address,u.name,u.location,u.role);
-    }
 
-    function get_farmer_history_count(address _farmer)public view returns (uint){
-        return farmer_history[_farmer].length;
+    function get_history_count(address _user, Role _role) public view returns (uint) {
+    if (_role == Role.Farmer) return farmer_history[_user].length;
+    if (_role == Role.Transporter) return transporter_history[_user].length;
+    if (_role == Role.Store_manager) return store_history[_user].length;
+    return 0;
     }
 
     function get_farmer_history_byIndex(address _farmer, uint index) public view returns(  uint id,address farmer,string memory product_name,
@@ -487,9 +479,7 @@ function approve_role(uint id) public onlyOwner {
     return ( f.id,f.farmer,f.product_name,f.sent_to,f.store,f.through,f.transporter,f.date);
     }
 
-     function get_transporter_history_count(address _transporter)public view returns (uint){
-        return transporter_history[_transporter].length;
-    }
+    
      function get_transporter_history_byIndex(address _transporter, uint index)public view returns(
          uint id,address farmer, address store,
         string memory farmer_name,string memory store_name,string memory crop_name,
@@ -499,9 +489,6 @@ function approve_role(uint id) public onlyOwner {
         return ( t.id,t.farmer,t.store,t.farmer_name,t.store_name,t.crop_name,t.from,t.to,t.date);
     }
 
-    function get_store_history_count(address _store)public view returns (uint){
-        return store_history[_store].length;
-    }
 
     function get_store_history_byIndex(address _store, uint index) public view returns(
         uint id,address farmer,address transporter,
@@ -544,7 +531,7 @@ function approve_role(uint id) public onlyOwner {
         Role role
     )
     {
-    require(index < all_users.length, "Index out of bounds");
+    require(index < all_users.length, "wrong index");
     address uAddr = all_users[index];
     User memory u = users[uAddr];
     return (u.user_address, u.name, u.location, u.successful_delivery, u.role);

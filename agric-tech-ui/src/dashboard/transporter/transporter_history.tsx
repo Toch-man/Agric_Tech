@@ -4,6 +4,8 @@ import { readContract } from "wagmi/actions";
 import { useAccount } from "wagmi";
 import { wagmiContractConfig } from "../../contracts/contract";
 import { config } from "../../wagmi";
+import { FaArrowLeft } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
 type transporter_chain = {
   id: string;
@@ -22,11 +24,12 @@ const Transporter_history = () => {
     transporter_chain[] | []
   >([]);
   const { address, isConnected } = useAccount();
+  const navigate = useNavigate();
 
   const { data: transporter_history_count, isLoading } = useReadContract({
     ...wagmiContractConfig,
     functionName: "get_transporter_history_count",
-    args: [address],
+    args: [address, 1],
     query: { enabled: !!address },
   });
 
@@ -66,7 +69,13 @@ const Transporter_history = () => {
 
   return (
     <div className="p-4 md:p-8">
-      <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
+      <div className="relative flex flex-col md:flex-row justify-between items-center gap-4 mb-6">
+        <div
+          className="absolute top-2 left-2"
+          onClick={() => navigate("transporter/dashboard")}
+        >
+          <FaArrowLeft size={18} />
+        </div>
         <div>
           <h1 className="text-2xl font-bold text-gray-800">Delivery History</h1>
           <p className="text-sm text-gray-600 mt-1">
