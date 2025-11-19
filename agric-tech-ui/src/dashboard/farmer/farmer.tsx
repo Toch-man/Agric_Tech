@@ -637,9 +637,9 @@ const Farmer_dashboard = () => {
                 ])
               }
             />
+            <label className="text-sm text-gray-600">Harvest Date</label>
             <input
               type="date"
-              placeholder="Harvest date"
               className="w-full border rounded p-2"
               value={upload_details[0]?.harvestDate || ""}
               onChange={(e) =>
@@ -648,6 +648,7 @@ const Farmer_dashboard = () => {
                 ])
               }
             />
+
             <input
               type="number"
               placeholder="Quantity"

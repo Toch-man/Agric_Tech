@@ -29,8 +29,14 @@ const Activity = () => {
 
   useEffect(() => {
     async function get_delivery_byIndex() {
-      if (!isConnected) return;
+      if (!isConnected || !delivery_count) return;
       const count = Number(delivery_count);
+
+      if (count === 0) {
+        set_deliveries([]);
+        return;
+      }
+
       const deliveries = Array.from({ length: count }, (_, i) => {
         return readContract(config, {
           ...wagmiContractConfig,
@@ -62,7 +68,7 @@ const Activity = () => {
     }
 
     get_delivery_byIndex();
-  }, [address]);
+  }, [address, delivery_count, isConnected]);
 
   return (
     <div className="p-4 md:p-8">
@@ -121,6 +127,9 @@ const Activity = () => {
                   Pick Up Location
                 </th>
                 <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">
+                  Transporter
+                </th>
+                <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">
                   Destination
                 </th>
                 <th className="px-4 py-3 text-left text-sm font-medium text-gray-700">
@@ -155,6 +164,9 @@ const Activity = () => {
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-700">
                       {delivery.pick_up_location}
+                    </td>
+                    <td className="px-4 py-3 text-sm text-gray-700">
+                      {delivery.transporter}
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-700">
                       {delivery.destination}
